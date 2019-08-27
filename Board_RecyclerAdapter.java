@@ -126,7 +126,7 @@ public class Board_RecyclerAdapter extends RecyclerView.Adapter<Board_RecyclerAd
                                     if (success)
                                         Toast.makeText(view.getContext(), "신청완료", Toast.LENGTH_SHORT).show();
                                     else
-                                        Toast.makeText(view.getContext(), "오류발생", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(view.getContext(), "이미 모집글에 속해있습니다.", Toast.LENGTH_SHORT).show();
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }

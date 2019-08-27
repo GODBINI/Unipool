@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GetTrustRequest extends StringRequest {
-    final static private String URL = "http://59.12.172.7/GetTrust.php";
+    final static private String URL = "http://112.186.52.105/GetTrust.php";
     private Map<String,String> parameters;
 
     public GetTrustRequest(String userID, Response.Listener<String> listener) {

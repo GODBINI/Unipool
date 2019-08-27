@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ApplyRefreshRequest extends StringRequest {
-    final static private String URL = "http://59.12.172.7/ApplyRefresh.php";
+    final static private String URL = "http://112.186.52.105/ApplyRefresh.php";
     private Map<String, String> parameters;
 
     public ApplyRefreshRequest(String leader_user, Response.Listener<String> listener) {

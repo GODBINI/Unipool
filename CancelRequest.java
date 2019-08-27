@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CancelRequest extends StringRequest {
-    final static private String URL = "http://59.12.172.7/Cancel_match.php";
+    final static private String URL = "http://112.186.52.105/Cancel_match.php";
     private Map<String,String> parameters;
 
     public CancelRequest(String userID, String departure, String arrival, Response.Listener<String> listener) {

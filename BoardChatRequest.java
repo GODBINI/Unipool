@@ -6,11 +6,11 @@ import com.android.volley.toolbox.StringRequest;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GetBoardRequest extends StringRequest {
-    final static private String URL = "http://112.186.52.105/GetBoard.php";
+public class BoardChatRequest extends StringRequest {
+    final static private String URL = "http://112.186.52.105/BoardChat.php";
     private Map<String,String> parameters;
 
-    public GetBoardRequest(String userID, Response.Listener<String> listener) {
+    public BoardChatRequest(String userID,Response.Listener<String> listener) {
         super(Method.POST,URL,listener,null);
         parameters = new HashMap<>();
         parameters.put("userID",userID);

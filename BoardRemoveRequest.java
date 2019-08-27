@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BoardRemoveRequest extends StringRequest {
-    final static private String URL = "http://59.12.172.7/Remove.php";
+    final static private String URL = "http://112.186.52.105/Remove.php";
     private Map<String, String> parameters;
 
     public BoardRemoveRequest(String leader_user, Response.Listener<String> listener) {

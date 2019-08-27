@@ -7,17 +7,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ChatRefreshRequest extends StringRequest {
-    final static private String URL = "http://59.12.172.7/ChatRefresh.php";
+    final static private String URL = "http://112.186.52.105/ChatRefresh_Test.php";
     private Map<String,String> parameters;
 
-    public ChatRefreshRequest(String userID, String user_1, String user_2, String user_3, String user_4, Response.Listener<String> listener) {
+    public ChatRefreshRequest(String userID, String title, Response.Listener<String> listener) {
         super(Method.POST,URL,listener,null);
         parameters = new HashMap<>();
         parameters.put("userID",userID);
-        parameters.put("user_1",user_1);
-        parameters.put("user_2",user_2);
-        parameters.put("user_3",user_3);
-        parameters.put("user_4",user_4);
+        parameters.put("title",title);
     }
 
     public Map<String,String> getParams() {

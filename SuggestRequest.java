@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SuggestRequest extends StringRequest {
-    final static private String URL = "http://59.12.172.7/Suggest.php";
+    final static private String URL = "http://112.186.52.105/Suggest.php";
     private Map<String, String> parameters;
 
     public SuggestRequest(String userID, String university,String departure,String arrival, Response.Listener<String> listener) {

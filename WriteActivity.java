@@ -68,12 +68,18 @@ public class WriteActivity extends AppCompatActivity {
                             try {
                                 JSONObject jsonResponse = new JSONObject(response);
                                 boolean success = jsonResponse.getBoolean("success");
+                                boolean overlap = jsonResponse.getBoolean("overlap");
                                 if(success){
                                     Toast.makeText(WriteActivity.this,"작성 완료!",Toast.LENGTH_SHORT).show();
                                     finish();
                                 }
                                 else {
-                                    Toast.makeText(WriteActivity.this,"작성 실패!",Toast.LENGTH_SHORT).show();
+                                    if(overlap) {
+                                        Toast.makeText(WriteActivity.this,"이미 작성한 게시글이 존재하거나 모집글에 속한상태입니다.",Toast.LENGTH_SHORT).show();
+                                    }
+                                    else {
+                                        Toast.makeText(WriteActivity.this,"같은제목을 가진 모집글이 이미 존재합니다!\n제목을 변경해주세요.",Toast.LENGTH_SHORT).show();
+                                    }
                                 }
                             }
                             catch (JSONException e) {

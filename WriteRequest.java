@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class WriteRequest extends StringRequest {
-    final static private String URL = "http://59.12.172.7/Write.php";
+    final static private String URL = "http://112.186.52.105/Write.php";
     private Map<String, String> parameters;
 
      public WriteRequest(String leader_user, String school, String title, String comment, Response.Listener<String> listener) {

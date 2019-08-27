@@ -74,6 +74,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
         final TextView nav_user_3 = (TextView)nav_headerView.findViewById(R.id.nav_user_3);
         final TextView nav_user_4 = (TextView)nav_headerView.findViewById(R.id.nav_user_4);
         final Button nav_leave_button = (Button)nav_headerView.findViewById(R.id.nav_leave_button);
+        final Button nav_chat_button = (Button)nav_headerView.findViewById(R.id.nav_chat_button);
         final LinearLayout party_layout = (LinearLayout)nav_headerView.findViewById(R.id.party_layout);
         final TextView null_Text = (TextView)nav_headerView.findViewById(R.id.null_Text);
 
@@ -206,7 +207,6 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                         try {
                             JSONObject jsonResponse = new JSONObject(response);
                             boolean success = jsonResponse.getBoolean("success");
-                            boolean b_success = jsonResponse.getBoolean("b_success");
                             if(success) {
                                 final String apply_user = jsonResponse.getString("apply_user");
                                 String trust = jsonResponse.getString("trust");
@@ -239,27 +239,6 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                                         .show();
                             }
                             else {
-                            }
-                            if(b_success) {
-                                finish();
-                                String school = jsonResponse.getString("school");
-                                String title = jsonResponse.getString("title");
-                                String user_1 = jsonResponse.getString("user_1");
-                                String user_2 = jsonResponse.getString("user_2");
-                                String user_3 = jsonResponse.getString("user_3");
-                                String user_4 = jsonResponse.getString("user_4");
-                                int quantity = jsonResponse.getInt("quantity");
-                                Intent BoardCompleteIntent = new Intent(BoardActivity.this,CompleteActivity.class);
-                                BoardCompleteIntent.putExtra("departure",school);
-                                BoardCompleteIntent.putExtra("arrival",title);
-                                BoardCompleteIntent.putExtra("userID",userID);
-                                BoardCompleteIntent.putExtra("user_1",user_1);
-                                BoardCompleteIntent.putExtra("user_2",user_2);
-                                BoardCompleteIntent.putExtra("user_3",user_3);
-                                BoardCompleteIntent.putExtra("user_4",user_4);
-                                BoardCompleteIntent.putExtra("quantity",quantity);
-                                BoardCompleteIntent.putExtra("isBoard",1);
-                                startActivity(BoardCompleteIntent);
                             }
                         }
                         catch (JSONException e) {
@@ -368,7 +347,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
-                builder.setMessage("모집을 완료하시겠습니까?")
+                builder.setMessage("모집을 완료하시겠습니까? \n완료하면 더이상 다른 사람들을 모집할수 없습니다.")
                         .setPositiveButton("예", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -379,24 +358,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                                             JSONObject jsonResponse = new JSONObject(response);
                                             boolean success = jsonResponse.getBoolean("success");
                                             if(success) {
-                                                /*String school = jsonResponse.getString("school");
-                                                String title = jsonResponse.getString("title");
-                                                String user_2 = jsonResponse.getString("user_2");
-                                                String user_3 = jsonResponse.getString("user_3");
-                                                String user_4 = jsonResponse.getString("user_4");
-                                                int quantity = jsonResponse.getInt("quantity");
-                                                Intent BoardCompleteIntent = new Intent(BoardActivity.this,CompleteActivity.class);
-                                                BoardCompleteIntent.putExtra("departure",school);
-                                                BoardCompleteIntent.putExtra("arrival",title);
-                                                BoardCompleteIntent.putExtra("userID",userID);
-                                                BoardCompleteIntent.putExtra("user_1",userID);
-                                                BoardCompleteIntent.putExtra("user_2",user_2);
-                                                BoardCompleteIntent.putExtra("user_3",user_3);
-                                                BoardCompleteIntent.putExtra("user_4",user_4);
-                                                BoardCompleteIntent.putExtra("quantity",quantity);
-                                                BoardCompleteIntent.putExtra("isBoard",1);
-                                                finish();
-                                                startActivity(BoardCompleteIntent); */
+                                                Toast.makeText(BoardActivity.this,"모집 완료.",Toast.LENGTH_SHORT).show();
                                             }
                                             else {
                                                 Toast.makeText(BoardActivity.this,"파티가 존재하지 않거나 리더가 아닙니다.",Toast.LENGTH_SHORT).show();
@@ -415,6 +377,54 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                         .setNegativeButton("아니요",null)
                         .create()
                         .show();
+            }
+        });
+
+        nav_chat_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Response.Listener<String> responseListener = new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject jsonResponse = new JSONObject(response);
+                            boolean success = jsonResponse.getBoolean("success");
+                            if(success) {
+                                String school = jsonResponse.getString("school");
+                                String title = jsonResponse.getString("title");
+                                String user_1 = jsonResponse.getString("leader_user");
+                                String user_2 = jsonResponse.getString("in_user_2");
+                                String user_3 = jsonResponse.getString("in_user_3");
+                                String user_4 = jsonResponse.getString("in_user_4");
+                                int quantity = jsonResponse.getInt("quantity");
+                                Intent BoardCompleteIntent = new Intent(BoardActivity.this,CompleteActivity.class);
+                                BoardCompleteIntent.putExtra("departure",school);
+                                BoardCompleteIntent.putExtra("arrival",title);
+                                BoardCompleteIntent.putExtra("userID",userID);
+                                BoardCompleteIntent.putExtra("user_1",user_1);
+                                BoardCompleteIntent.putExtra("user_2",user_2);
+                                BoardCompleteIntent.putExtra("user_3",user_3);
+                                BoardCompleteIntent.putExtra("user_4",user_4);
+                                BoardCompleteIntent.putExtra("quantity",quantity);
+                                BoardCompleteIntent.putExtra("isBoard",1);
+                                startActivity(BoardCompleteIntent);
+                            }
+                            else {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
+                                builder.setMessage("파티모집을 먼저 완료해 주세요.")
+                                        .setPositiveButton("확인",null)
+                                        .create()
+                                        .show();
+                            }
+                        }
+                        catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                };
+                BoardChatRequest boardChatRequest = new BoardChatRequest(userID,responseListener);
+                RequestQueue requestQueue = Volley.newRequestQueue(BoardActivity.this);
+                requestQueue.add(boardChatRequest);
             }
         });
     }

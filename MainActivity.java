@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 int quantity = jsonResponse.getInt("quantity");
                                 if(onMatch) {
                                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                                    builder.setMessage("이미 매칭 진행중이거나 현재 모집글에 속해있습니다.")
+                                    builder.setMessage("이미 매칭 진행중입니다.")
                                             .setNegativeButton("확인", null)
                                             .create()
                                             .show();

@@ -17,6 +17,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -27,8 +28,8 @@ import java.util.TimerTask;
 public class CompleteActivity extends AppCompatActivity {
     Timer timer;
     Timer timer2;
-    String g_userID,g_user_1,g_user_2,g_user_3,g_user_4;
-    int g_quantity;
+    int is_board;
+    int u_count = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,15 +38,15 @@ public class CompleteActivity extends AppCompatActivity {
 
         Intent beforeIntent = getIntent();
         final String userID = beforeIntent.getStringExtra("userID");
-        String departure = beforeIntent.getStringExtra("departure");
-        String arrival = beforeIntent.getStringExtra("arrival");
+        final String departure = beforeIntent.getStringExtra("departure");
+        final String arrival = beforeIntent.getStringExtra("arrival");
         final String user_1 = beforeIntent.getStringExtra("user_1");
         final String user_2 = beforeIntent.getStringExtra("user_2");
         final String user_3 = beforeIntent.getStringExtra("user_3");
         final String user_4 = beforeIntent.getStringExtra("user_4");
         final int quantity = beforeIntent.getIntExtra("quantity",1);
         final int isBoard = beforeIntent.getIntExtra("isBoard",0);
-        g_userID = userID; g_user_1 = user_1; g_user_2 = user_2; g_user_3 = user_3; g_user_4 = user_4; g_quantity = quantity;
+        is_board = isBoard;
 
         final TextView departure_Text = (TextView)findViewById(R.id.departure_Text);
         final TextView arrival_Text = (TextView)findViewById(R.id.arrival_Text);
@@ -86,16 +87,6 @@ public class CompleteActivity extends AppCompatActivity {
                                 JSONObject jsonResponse = new JSONObject(response);
                                 boolean success = jsonResponse.getBoolean("success");
                                 if(success) {
-                                    Intent TrustIntent = new Intent(CompleteActivity.this, TrustActivity.class);
-                                    TrustIntent.putExtra("userID",userID);
-                                    TrustIntent.putExtra("user_1",user_1);
-                                    TrustIntent.putExtra("user_2",user_2);
-                                    TrustIntent.putExtra("user_3",user_3);
-                                    TrustIntent.putExtra("user_4",user_4);
-                                    TrustIntent.putExtra("quantity",quantity);
-                                    TrustIntent.putExtra("isBoard",isBoard);
-                                    //startActivity(TrustIntent);
-                                    //finish();
                                 }
                             }
                             catch (Exception e) {
@@ -103,7 +94,13 @@ public class CompleteActivity extends AppCompatActivity {
                             }
                         }
                     };
-                    ArriveRequest arriveRequest = new ArriveRequest(user_1,user_2,user_3,user_4,responseListener);
+                    ArriveRequest arriveRequest;
+                    if(isBoard == 1) {
+                        arriveRequest = new ArriveRequest(user_1,user_2,user_3,user_4,isBoard,arrival,responseListener);
+                    }
+                    else {
+                        arriveRequest = new ArriveRequest(user_1,user_2,user_3,user_4,isBoard,departure,responseListener);
+                    }
                     RequestQueue requestQueue = Volley.newRequestQueue(CompleteActivity.this);
                     requestQueue.add(arriveRequest);
                 }
@@ -135,10 +132,17 @@ public class CompleteActivity extends AppCompatActivity {
                             }
                         }
                     };
-                    ChatInputRequest chatInputRequest = new ChatInputRequest(userID, chat_Text, responseListener);
+                    ChatInputRequest chatInputRequest;
+                    if (isBoard == 1) {
+                        chatInputRequest = new ChatInputRequest(userID, arrival, chat_Text, responseListener);
+                    }
+                    else {
+                        chatInputRequest = new ChatInputRequest(userID, departure, chat_Text, responseListener);
+                    }
                     RequestQueue requestQueue = Volley.newRequestQueue(CompleteActivity.this);
                     requestQueue.add(chatInputRequest);
                 }
+                chat_RecyclerView.scrollToPosition(recyclerAdapter.getItemCount()-1);
             }
         });
 
@@ -150,20 +154,25 @@ public class CompleteActivity extends AppCompatActivity {
                     public void onResponse(String response) {
                         try {
                             JSONObject jsonResponse = new JSONObject(response);
-                            boolean success = jsonResponse.getBoolean("success");
-                            boolean myText = jsonResponse.getBoolean("myText");
-                            String chat_Text = jsonResponse.getString("chat_Text");
-                            String chat_user = jsonResponse.getString("chat_user");
-
-                            if(success) {
-                                //Toast.makeText(CompleteActivity.this,chat_user+","+chat_Text,Toast.LENGTH_SHORT).show();
-                                chat_data chatData = new chat_data(chat_user,chat_Text,myText);
+                            JSONArray jsonArray = jsonResponse.getJSONArray("response");
+                            int count = 0;
+                            boolean myText;
+                            String chat_Text,chat_user;
+                            recyclerAdapter.init();
+                            while(count < jsonArray.length()) {
+                                JSONObject jsonObject = jsonArray.getJSONObject(count);
+                                myText = jsonObject.getBoolean("myText");
+                                chat_Text = jsonObject.getString("chat_Text");
+                                chat_user = jsonObject.getString("chat_user");
+                                chat_data chatData = new chat_data(chat_user, chat_Text, myText);
                                 recyclerAdapter.addItem(chatData);
                                 recyclerAdapter.notifyDataSetChanged();
-                                chat_RecyclerView.scrollToPosition(recyclerAdapter.getItemCount()-1);
+                                //chat_RecyclerView.scrollToPosition(recyclerAdapter.getItemCount() - 1);
+                                count++;
                             }
-                            else {
-                                //Toast.makeText(CompleteActivity.this,"채팅 서버 연결실패",Toast.LENGTH_SHORT).show();
+                            if(u_count == 0) {
+                                chat_RecyclerView.scrollToPosition(recyclerAdapter.getItemCount() - 1);
+                                u_count++;
                             }
                         }
                         catch (Exception e ){
@@ -171,7 +180,13 @@ public class CompleteActivity extends AppCompatActivity {
                         }
                     }
                 };
-                ChatRefreshRequest chatRefreshRequest = new ChatRefreshRequest(userID,user_1,user_2,user_3,user_4,responseListener);
+                ChatRefreshRequest chatRefreshRequest;
+                if(isBoard == 1) {
+                    chatRefreshRequest = new ChatRefreshRequest(userID, arrival, responseListener);
+                }
+                else {
+                    chatRefreshRequest = new ChatRefreshRequest(userID, departure, responseListener);
+                }
                 RequestQueue requestQueue = Volley.newRequestQueue(CompleteActivity.this);
                 requestQueue.add(chatRefreshRequest);
             }
@@ -189,8 +204,21 @@ public class CompleteActivity extends AppCompatActivity {
                             JSONObject jsonResponse = new JSONObject(response);
                             boolean success = jsonResponse.getBoolean("success");
                             int onArrival = jsonResponse.getInt("onArrival");
+                            int onComplete = jsonResponse.getInt("onComplete");
                             if(success) {
                                 if(onArrival==1) {
+                                    Intent TrustIntent = new Intent(CompleteActivity.this, TrustActivity.class);
+                                    TrustIntent.putExtra("userID",userID);
+                                    TrustIntent.putExtra("user_1",user_1);
+                                    TrustIntent.putExtra("user_2",user_2);
+                                    TrustIntent.putExtra("user_3",user_3);
+                                    TrustIntent.putExtra("user_4",user_4);
+                                    TrustIntent.putExtra("quantity",quantity);
+                                    TrustIntent.putExtra("isBoard",isBoard);
+                                    startActivity(TrustIntent);
+                                    finish();
+                                }
+                                if(onComplete==2) {
                                     Intent TrustIntent = new Intent(CompleteActivity.this, TrustActivity.class);
                                     TrustIntent.putExtra("userID",userID);
                                     TrustIntent.putExtra("user_1",user_1);
@@ -223,6 +251,9 @@ public class CompleteActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        if(is_board == 1) {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -231,39 +262,5 @@ public class CompleteActivity extends AppCompatActivity {
         timer.cancel();
         timer2.cancel();
         super.onDestroy();
-    }
-
-    @Override
-    public void onPause() {
-        Log.d("CompleteAc","onPause()");
-        /*if(g_userID.equals(g_user_1)) {
-            Response.Listener<String> responseListener = new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    try {
-                        JSONObject jsonResponse = new JSONObject(response);
-                        boolean success = jsonResponse.getBoolean("success");
-                        if(success) {
-                            Intent TrustIntent = new Intent(CompleteActivity.this, TrustActivity.class);
-                            TrustIntent.putExtra("userID",g_userID);
-                            TrustIntent.putExtra("user_1",g_user_1);
-                            TrustIntent.putExtra("user_2",g_user_2);
-                            TrustIntent.putExtra("user_3",g_user_3);
-                            TrustIntent.putExtra("user_4",g_user_4);
-                            TrustIntent.putExtra("quantity",g_quantity);
-                            //startActivity(TrustIntent);
-                            //finish();
-                        }
-                    }
-                    catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            };
-            ArriveRequest arriveRequest = new ArriveRequest(g_user_1,g_user_2,g_user_3,g_user_4,responseListener);
-            RequestQueue requestQueue = Volley.newRequestQueue(CompleteActivity.this);
-            requestQueue.add(arriveRequest);
-        } */
-        super.onPause();
     }
 }
