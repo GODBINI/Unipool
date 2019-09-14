@@ -1,12 +1,12 @@
 package com.unipool.unipool;
 
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -51,12 +51,14 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
 
         private TextView chat_userID;
         private TextView chat_Text;
+        private  LinearLayout linearLayout;
+        private EditText editText;
 
         ItemViewHolder(View itemView) {
             super(itemView);
             chat_userID = itemView.findViewById(R.id.chat_userID);
             chat_Text = itemView.findViewById(R.id.chat_Text);
-
+            linearLayout = itemView.findViewById(R.id.chat_layout);
         }
 
         void onBind(chat_data data) {

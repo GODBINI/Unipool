@@ -1,14 +1,17 @@
 package com.unipool.unipool;
 
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.graphics.Rect;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
@@ -18,8 +21,13 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class WriteActivity extends AppCompatActivity {
+import java.util.Calendar;
 
+public class WriteActivity extends AppCompatActivity {
+    Button write_time_button;
+    TextView write_time_text;
+    String msg="";
+    final Calendar cal = Calendar.getInstance();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +41,8 @@ public class WriteActivity extends AppCompatActivity {
         final EditText School_Text = (EditText)findViewById(R.id.School_Text);
         final EditText Title_Text = (EditText)findViewById(R.id.Title_Text);
         final EditText Comment_Text = (EditText)findViewById(R.id.Comment_Text);
+        write_time_button = (Button)findViewById(R.id.write_time_button);
+        write_time_text = (TextView) findViewById(R.id.write_time_text);
 
         Write_Cancel_Button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,6 +67,13 @@ public class WriteActivity extends AppCompatActivity {
                 else if(title.trim().length() < 6 || title.length() > 31) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(WriteActivity.this);
                     builder.setMessage("제목은 6~30자 사이로 작성해주세요.")
+                            .setPositiveButton("확인",null)
+                            .create()
+                            .show();
+                }
+                else if(msg.trim().equals("")) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(WriteActivity.this);
+                    builder.setMessage("시간을 설정해주세요.")
                             .setPositiveButton("확인",null)
                             .create()
                             .show();
@@ -87,10 +104,24 @@ public class WriteActivity extends AppCompatActivity {
                             }
                         }
                     };
-                    WriteRequest writeRequest = new WriteRequest(userID,school,title,comment,responseListener);
+                    WriteRequest writeRequest = new WriteRequest(userID,school,title,"[출발 시간 : "+msg+"]\n"+comment,responseListener);
                     RequestQueue requestQueue = Volley.newRequestQueue(WriteActivity.this);
                     requestQueue.add(writeRequest);
                 }
+            }
+        });
+
+        write_time_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                TimePickerDialog timePickerDialog = new TimePickerDialog(WriteActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker timePicker, int i, int i1) {
+                        msg = String.format("%d 시 %d 분", i, i1);
+                        write_time_text.setText("탑승 시간 : "+msg);
+                    }
+                },cal.get(Calendar.HOUR_OF_DAY),cal.get(Calendar.MINUTE),true);
+                timePickerDialog.show();
             }
         });
     }

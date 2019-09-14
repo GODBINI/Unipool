@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CompleteRequest extends StringRequest {
-    final static private String URL = "http://112.186.52.105/Complete_match.php";
+    final static private String URL = "http://218.155.17.58/Complete_match.php";
     private Map<String,String> parameters;
 
     public  CompleteRequest(String userID, String departure, String arrival ,Response.Listener<String> listener) {

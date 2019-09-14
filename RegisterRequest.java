@@ -10,12 +10,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RegisterRequest extends StringRequest{
-    final static private String URL = "http://112.186.52.105/Register.php";
+    final static private String URL = "http://218.155.17.58/Register.php";
     private Map<String, String> parameters;
 
-    public RegisterRequest(String userID, String userPW,String Uni,String Account, Response.Listener<String> listener) {
+    public RegisterRequest(String email,String userID, String userPW,String Uni,String Account, Response.Listener<String> listener) {
         super(Method.POST, URL, listener, null);
         parameters = new HashMap<>();
+        parameters.put("email",email);
         parameters.put("userID", userID);
         parameters.put("userPW", userPW);
         parameters.put("Uni", Uni);

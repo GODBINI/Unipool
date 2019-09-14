@@ -1,15 +1,18 @@
 package com.unipool.unipool;
 
+import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,7 +24,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -30,6 +32,9 @@ public class CompleteActivity extends AppCompatActivity {
     Timer timer2;
     int is_board;
     int u_count = 0;
+    InputMethodManager inputMethodManager;
+    EditText chat_EditText;
+    LinearLayout linearLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,12 +63,14 @@ public class CompleteActivity extends AppCompatActivity {
         final Button arrival_Button = (Button)findViewById(R.id.arrival_Button);
         final Button chat_Button = (Button)findViewById(R.id.chat_Button);
 
-        final EditText chat_EditText = (EditText)findViewById(R.id.chat_EditText);
+        chat_EditText = (EditText)findViewById(R.id.chat_EditText);
+        linearLayout = (LinearLayout)findViewById(R.id.complete_layout);
 
         final RecyclerView chat_RecyclerView = (RecyclerView)findViewById(R.id.chat_RecyclerView);
         final RecyclerAdapter recyclerAdapter = new RecyclerAdapter();
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+        inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        //getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         chat_RecyclerView.setLayoutManager(linearLayoutManager);
 
@@ -247,6 +254,7 @@ public class CompleteActivity extends AppCompatActivity {
         };
         timer2 = new Timer();
         timer2.schedule(timerTask2,0,1000);
+
     }
 
     @Override
@@ -263,4 +271,5 @@ public class CompleteActivity extends AppCompatActivity {
         timer2.cancel();
         super.onDestroy();
     }
+
 }

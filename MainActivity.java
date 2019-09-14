@@ -2,17 +2,17 @@ package com.unipool.unipool;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.support.annotation.NonNull;
-import android.support.annotation.UiThread;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.UiThread;
+import com.google.android.material.navigation.NavigationView;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -56,10 +56,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     String trust;
     MapFragment mapFragment = (MapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
     final StringList stringList = new StringList();
+    Dialog dialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_draw);
+
+        /*final DBHelper dbHelper = new DBHelper(MainActivity.this);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.execSQL("delete from login_info");
+        db.close();*/
 
         //변수 선언
         Intent beforeIntent = getIntent();
@@ -139,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         home_boardButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Dialog dialog = new Dialog(MainActivity.this);
+                dialog = new Dialog(MainActivity.this);
                 dialog.setContentView(R.layout.loading);
                 ImageView imageView = (ImageView)dialog.findViewById(R.id.loading_image);
                 imageView.setImageResource(R.drawable.loading);
@@ -274,7 +280,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             time=System.currentTimeMillis();
             Toast.makeText(getApplicationContext(),"뒤로 버튼을 한번 더 누르면 종료합니다.", Toast.LENGTH_SHORT).show();
         }else if(System.currentTimeMillis()-time<1000){
-            finish();
+            finishAffinity();
+            System.runFinalization();
+            System.exit(0);
         }
     }
 
@@ -383,5 +391,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        dialog.dismiss();
     }
 }

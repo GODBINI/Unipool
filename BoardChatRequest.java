@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BoardChatRequest extends StringRequest {
-    final static private String URL = "http://112.186.52.105/BoardChat.php";
+    final static private String URL = "http://218.155.17.58/BoardChat.php";
     private Map<String,String> parameters;
 
     public BoardChatRequest(String userID,Response.Listener<String> listener) {

@@ -5,15 +5,15 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import com.google.android.material.navigation.NavigationView;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -43,6 +43,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
     LinearLayoutManager linearLayoutManager;
     String user;
     Timer timer;
+    Dialog dialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -150,7 +151,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
         board_homeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Dialog dialog = new Dialog(BoardActivity.this);
+                dialog = new Dialog(BoardActivity.this);
                 dialog.setContentView(R.layout.loading);
                 ImageView imageView = (ImageView)dialog.findViewById(R.id.loading_image);
                 imageView.setImageResource(R.drawable.loading);
@@ -194,7 +195,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
         user_setting_Button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                drawer.openDrawer(Gravity.START);
+                drawer.openDrawer(GravityCompat.START);
             }
         });
 
@@ -320,6 +321,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                                                         .setPositiveButton("확인",null)
                                                         .create()
                                                         .show();
+                                                drawer.closeDrawer(GravityCompat.START);
                                                 board_recyclerAdapter.init();
                                                 board_recyclerAdapter.notifyDataSetChanged();
                                                 refresh();
@@ -435,7 +437,9 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
             time=System.currentTimeMillis();
             Toast.makeText(getApplicationContext(),"뒤로 버튼을 한번 더 누르면 종료합니다.", Toast.LENGTH_SHORT).show();
         }else if(System.currentTimeMillis()-time<1000){
-            finish();
+            finishAffinity();
+            System.runFinalization();
+            System.exit(0);
         }
     }
 
@@ -476,6 +480,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
     public void onDestroy(){
         timer.cancel();
         super.onDestroy();
+        dialog.dismiss();
     }
 
     @Override

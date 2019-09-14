@@ -6,17 +6,15 @@ import com.android.volley.toolbox.StringRequest;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SuggestRequest extends StringRequest {
-    final static private String URL = "http://218.155.17.58/Suggest.php";
+public class SuggestTextRequest extends StringRequest {
+    final static private String URL = "http://218.155.17.58/SuggestText.php";
     private Map<String, String> parameters;
 
-    public SuggestRequest(String userID, String university,String departure,String arrival, Response.Listener<String> listener) {
+    public SuggestTextRequest(String userID, String text, Response.Listener<String> listener) {
         super(Method.POST, URL, listener, null);
         parameters = new HashMap<>();
         parameters.put("userID", userID);
-        parameters.put("university", university);
-        parameters.put("departure", departure);
-        parameters.put("arrival", arrival);
+        parameters.put("text", text);
     }
 
     public Map<String, String> getParams () {

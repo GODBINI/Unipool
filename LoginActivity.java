@@ -1,14 +1,13 @@
 package com.unipool.unipool;
 
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,8 +20,6 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.security.MessageDigest;
-
 public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,10 +31,12 @@ public class LoginActivity extends AppCompatActivity {
         final Button RegisterButton = (Button)findViewById(R.id.RegisterButton);
         final Button LoginButton = (Button)findViewById(R.id.LoginButton);
 
+        final DBHelper dbHelper = new DBHelper(LoginActivity.this);
+
         RegisterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent RegisterIntent = new Intent(LoginActivity.this,RegisterActivity.class);
+                Intent RegisterIntent = new Intent(LoginActivity.this,GoogleLogin.class);
                 startActivityForResult(RegisterIntent,1);
             }
         });
@@ -55,6 +54,9 @@ public class LoginActivity extends AppCompatActivity {
                             boolean success = jsonResponse.getBoolean("success");
                             String Uni = jsonResponse.getString("Uni");
                             if(success) {
+                                SQLiteDatabase wdb = dbHelper.getWritableDatabase();
+                                wdb.execSQL("insert into login_info(userID,userPW,uni) values(?,?,?)",new String[]{userID,userPW,Uni});
+                                wdb.close();
                                 Intent LoginIntent = new Intent(LoginActivity.this, MainActivity.class);
                                 LoginIntent.putExtra("userID",userID);
                                 LoginIntent.putExtra("Uni",Uni);

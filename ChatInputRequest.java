@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ChatInputRequest extends StringRequest{
-    final static private String URL = "http://112.186.52.105/Chat.php";
+    final static private String URL = "http://218.155.17.58/Chat.php";
     private Map<String,String> parameters;
 
     public ChatInputRequest(String userID,String title, String chat_Text, Response.Listener<String> listener) {

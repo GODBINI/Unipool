@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ChangePwRequest extends StringRequest {
-    final static private String URL = "http://112.186.52.105/ChangePW.php";
+    final static private String URL = "http://218.155.17.58/ChangePW.php";
     private Map<String,String> parameters;
 
     public ChangePwRequest(String userID,String newPW,Response.Listener<String> listener) {

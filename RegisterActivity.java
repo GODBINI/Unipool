@@ -1,42 +1,52 @@
 package com.unipool.unipool;
 
+import android.content.Context;
 import android.content.DialogInterface;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.text.InputFilter;
-import android.text.Spanned;
-import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONObject;
 
-import java.util.regex.Pattern;
-
 public class RegisterActivity extends AppCompatActivity {
+
+    InputMethodManager inputMethodManager;
+    LinearLayout linearLayout;
+    EditText Register_idText;
+    EditText Register_pwText;
+    EditText Register_UniText;
+    EditText Register_accountText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        final String email = getIntent().getStringExtra("email");
         final Button Register_OkButton = (Button)findViewById(R.id.Register_OkButton);
         final Button Register_CancelButton = (Button)findViewById(R.id.Register_CancelButton);
-        final EditText Register_idText = (EditText)findViewById(R.id.Register_idText);
-        final EditText Register_pwText = (EditText)findViewById(R.id.Register_pwText);
-        final EditText Register_UniText = (EditText)findViewById(R.id.Register_UniText);
-        final EditText Register_accountText = (EditText)findViewById(R.id.Register_accountText);
+        Register_idText = (EditText)findViewById(R.id.Register_idText);
+        Register_pwText = (EditText)findViewById(R.id.Register_pwText);
+        Register_UniText = (EditText)findViewById(R.id.Register_UniText);
+        Register_accountText = (EditText)findViewById(R.id.Register_accountText);
 
+        linearLayout = (LinearLayout)findViewById(R.id.register_layout);
+        inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        linearLayout.setOnClickListener(myClickListener);
 
         Register_CancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -68,31 +78,47 @@ public class RegisterActivity extends AppCompatActivity {
                                 JSONObject jsonResponse = new JSONObject(response);
                                 boolean overlap = jsonResponse.getBoolean("overlap");
                                 boolean success = jsonResponse.getBoolean("success");
+                                boolean mail = jsonResponse.getBoolean("mail");
 
-                                if (!overlap) {
+                                if (!mail) {
                                     AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
-                                    builder.setMessage("이미 등록된 아이디 입니다.")
-                                            .setNegativeButton("다시시도", null)
+                                    builder.setMessage("이미 가입된 구글계정 입니다.")
+                                            .setNegativeButton("확인", null)
                                             .create()
                                             .show();
-                                } else {
-                                    if (success) {
+                                }
+                                else {
+                                    if (!overlap) {
                                         AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
-                                        builder.setMessage("회원가입 성공")
-                                                .setPositiveButton("확인", new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                                        finish();
-                                                    }
-                                                })
-                                                .create()
-                                                .show();
-                                    } else {
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
-                                        builder.setMessage("회원가입 실패!")
+                                        builder.setMessage("이미 등록된 아이디 입니다.")
                                                 .setNegativeButton("다시시도", null)
                                                 .create()
                                                 .show();
+                                    } else {
+                                        if (success) {
+                                            DBHelper dbHelper = new DBHelper(RegisterActivity.this);
+                                            SQLiteDatabase db = dbHelper.getWritableDatabase();
+                                            db.execSQL("insert into login_info(userID,userPW,uni) values(?,?,?)",new String[]{userID,userPW,Uni});
+                                            db.close();
+                                            AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
+                                            builder.setMessage("회원가입 성공")
+                                                    .setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                                                        @Override
+                                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                                            Intent intent = new Intent(RegisterActivity.this,SplashActivity.class);
+                                                            startActivity(intent);
+                                                            finish();
+                                                        }
+                                                    })
+                                                    .create()
+                                                    .show();
+                                        } else {
+                                            AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
+                                            builder.setMessage("회원가입 실패!")
+                                                    .setNegativeButton("다시시도", null)
+                                                    .create()
+                                                    .show();
+                                        }
                                     }
                                 }
                             } catch (Exception e) {
@@ -100,7 +126,7 @@ public class RegisterActivity extends AppCompatActivity {
                             }
                         }
                     };
-                    RegisterRequest registerRequest = new RegisterRequest(userID, userPW, Uni, Account, responseListener);
+                    RegisterRequest registerRequest = new RegisterRequest(email,userID, userPW, Uni, Account, responseListener);
                     RequestQueue queue = Volley.newRequestQueue(RegisterActivity.this);
                     queue.add(registerRequest);
                 }
@@ -108,9 +134,28 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
+    View.OnClickListener myClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            hideKeyboard();
+            switch (view.getId())
+            {
+                case R.id.register_layout :
+                    break;
+            }
+        }
+    };
     // 뒤로가기 막기
     @Override
     public void onBackPressed() {
+    }
+
+    private void hideKeyboard()
+    {
+        inputMethodManager.hideSoftInputFromWindow(Register_idText.getWindowToken(), 0);
+        inputMethodManager.hideSoftInputFromWindow(Register_pwText.getWindowToken(), 0);
+        inputMethodManager.hideSoftInputFromWindow(Register_UniText.getWindowToken(), 0);
+        inputMethodManager.hideSoftInputFromWindow(Register_accountText.getWindowToken(), 0);
     }
 
 }

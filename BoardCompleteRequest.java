@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BoardCompleteRequest extends StringRequest {
-    final static private String URL = "http://112.186.52.105/BoardComplete.php";
+    final static private String URL = "http://218.155.17.58/BoardComplete.php";
     private Map<String, String> parameters;
 
     public BoardCompleteRequest(String userID, Response.Listener<String> listener) {

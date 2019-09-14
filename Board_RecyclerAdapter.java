@@ -1,15 +1,13 @@
 package com.unipool.unipool;
 
-import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.RecyclerView;
-import android.view.Gravity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -123,10 +121,12 @@ public class Board_RecyclerAdapter extends RecyclerView.Adapter<Board_RecyclerAd
                                 try {
                                     JSONObject jsonResponse = new JSONObject(response);
                                     boolean success = jsonResponse.getBoolean("success");
-                                    if (success)
+                                    if (success) {
                                         Toast.makeText(view.getContext(), "신청완료", Toast.LENGTH_SHORT).show();
-                                    else
+                                    }
+                                    else {
                                         Toast.makeText(view.getContext(), "이미 모집글에 속해있습니다.", Toast.LENGTH_SHORT).show();
+                                    }
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
