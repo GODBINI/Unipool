@@ -1,6 +1,7 @@
 package com.unipool.unipool;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -19,9 +20,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,8 +55,10 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
         Intent beforeIntent = getIntent();
         final String userID = beforeIntent.getStringExtra("userID");
         user = userID;
+
         final String trust = beforeIntent.getStringExtra("trust");
         final String Uni = beforeIntent.getStringExtra("Uni");
+        final String[] U_list = beforeIntent.getStringArrayExtra("U_list");
         final Button board_homeButton = (Button)findViewById(R.id.board_homeButton);
         final Button board_boardButton = (Button)findViewById(R.id.board_boardButton);
         final Button Write_Button = (Button)findViewById(R.id.Write_Button);
@@ -61,6 +66,10 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
         final Button Remove_Button = (Button)findViewById(R.id.Remove_Button);
         final Button board_complete_button = (Button)findViewById(R.id.board_complete_button);
         final Button user_setting_Button2 = (Button)findViewById(R.id.user_setting_Button2);
+
+        final Spinner board_spinner = (Spinner)findViewById(R.id.board_spinner);
+        ArrayAdapter boardSpinnerAdapter = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item,U_list);
+        board_spinner.setAdapter(boardSpinnerAdapter);
 
         final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.board_drawer_layout);
         NavigationView navigationView = (NavigationView) findViewById(R.id.board_nav_view);
@@ -160,6 +169,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                 Intent board_homeIntent = new Intent(BoardActivity.this,MainActivity.class);
                 board_homeIntent.putExtra("userID",userID);
                 board_homeIntent.putExtra("Uni",Uni);
+                board_homeIntent.putExtra("U_list",U_list);
                 startActivity(board_homeIntent);
                 overridePendingTransition(R.anim.anim_slide_out_right,R.anim.anim_slide_in_left);
                 finish();
@@ -179,6 +189,8 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                 Intent Write_Intent = new Intent(BoardActivity.this,WriteActivity.class);
                 Write_Intent.putExtra("userID",userID);
                 Write_Intent.putExtra("trust",trust);
+                Write_Intent.putExtra("Uni",Uni);
+                Write_Intent.putExtra("U_list",U_list);
                 startActivity(Write_Intent);
             }
         });
@@ -409,6 +421,8 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                                 BoardCompleteIntent.putExtra("user_4",user_4);
                                 BoardCompleteIntent.putExtra("quantity",quantity);
                                 BoardCompleteIntent.putExtra("isBoard",1);
+                                BoardCompleteIntent.putExtra("U_list",U_list);
+                                BoardCompleteIntent.putExtra("Uni",Uni);
                                 startActivity(BoardCompleteIntent);
                             }
                             else {
@@ -429,6 +443,12 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                 requestQueue.add(boardChatRequest);
             }
         });
+
+        for (int i=0; i< U_list.length; i++) {
+            if(U_list[i].equals(Uni)){
+                board_spinner.setSelection(i);
+            }
+        }
     }
 
     @Override

@@ -49,6 +49,8 @@ public class CompleteActivity extends AppCompatActivity {
         final String user_2 = beforeIntent.getStringExtra("user_2");
         final String user_3 = beforeIntent.getStringExtra("user_3");
         final String user_4 = beforeIntent.getStringExtra("user_4");
+        final String[] U_list = beforeIntent.getStringArrayExtra("U_list");
+        final String Uni = beforeIntent.getStringExtra("Uni");
         final int quantity = beforeIntent.getIntExtra("quantity",1);
         final int isBoard = beforeIntent.getIntExtra("isBoard",0);
         is_board = isBoard;
@@ -106,7 +108,7 @@ public class CompleteActivity extends AppCompatActivity {
                         arriveRequest = new ArriveRequest(user_1,user_2,user_3,user_4,isBoard,arrival,responseListener);
                     }
                     else {
-                        arriveRequest = new ArriveRequest(user_1,user_2,user_3,user_4,isBoard,departure,responseListener);
+                        arriveRequest = new ArriveRequest(user_1,user_2,user_3,user_4,isBoard,departure+user_1,responseListener);
                     }
                     RequestQueue requestQueue = Volley.newRequestQueue(CompleteActivity.this);
                     requestQueue.add(arriveRequest);
@@ -144,7 +146,7 @@ public class CompleteActivity extends AppCompatActivity {
                         chatInputRequest = new ChatInputRequest(userID, arrival, chat_Text, responseListener);
                     }
                     else {
-                        chatInputRequest = new ChatInputRequest(userID, departure, chat_Text, responseListener);
+                        chatInputRequest = new ChatInputRequest(userID, departure+user_1, chat_Text, responseListener);
                     }
                     RequestQueue requestQueue = Volley.newRequestQueue(CompleteActivity.this);
                     requestQueue.add(chatInputRequest);
@@ -192,7 +194,7 @@ public class CompleteActivity extends AppCompatActivity {
                     chatRefreshRequest = new ChatRefreshRequest(userID, arrival, responseListener);
                 }
                 else {
-                    chatRefreshRequest = new ChatRefreshRequest(userID, departure, responseListener);
+                    chatRefreshRequest = new ChatRefreshRequest(userID, departure+user_1, responseListener);
                 }
                 RequestQueue requestQueue = Volley.newRequestQueue(CompleteActivity.this);
                 requestQueue.add(chatRefreshRequest);
@@ -234,6 +236,8 @@ public class CompleteActivity extends AppCompatActivity {
                                     TrustIntent.putExtra("user_4",user_4);
                                     TrustIntent.putExtra("quantity",quantity);
                                     TrustIntent.putExtra("isBoard",isBoard);
+                                    TrustIntent.putExtra("U_list",U_list);
+                                    TrustIntent.putExtra("Uni",Uni);
                                     startActivity(TrustIntent);
                                     finish();
                                 }

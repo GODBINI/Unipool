@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ChangeUniRequest extends StringRequest {
-    final static private String URL = "http://218.155.17.58/ChangeUni.php";
+    final static private String URL = "http://121.137.115.20/ChangeUni.php";
     private Map<String,String> parameters;
 
     public ChangeUniRequest(String userID, String newUni, Response.Listener<String> listener) {

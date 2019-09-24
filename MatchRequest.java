@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MatchRequest extends StringRequest {
-    final static private String URL = "http://218.155.17.58/Match.php";
+    final static private String URL = "http://121.137.115.20/Match.php";
     private Map<String,String> parameters;
 
     public MatchRequest(String userID, String departure, String arrival, Response.Listener<String> listener) {

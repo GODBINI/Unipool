@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BoardLeaveRequest extends StringRequest {
-    final static private String URL = "http://218.155.17.58/Leave.php";
+    final static private String URL = "http://121.137.115.20/Leave.php";
     private Map<String, String> parameters;
 
     public BoardLeaveRequest(String userID, Response.Listener<String> listener) {

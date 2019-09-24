@@ -1,5 +1,6 @@
 package com.unipool.unipool;
 
+import android.content.Context;
 import android.content.Intent;
 
 import androidx.appcompat.app.AlertDialog;
@@ -23,6 +24,9 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+
+        Context context = getApplicationContext();
+        final StringList stringList = new StringList(context);
 
         final DBHelper dbHelper = new DBHelper(SplashActivity.this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -55,6 +59,7 @@ public class SplashActivity extends AppCompatActivity {
                             Intent LoginIntent = new Intent(SplashActivity.this, MainActivity.class);
                             LoginIntent.putExtra("userID",userID);
                             LoginIntent.putExtra("Uni",Uni);
+                            LoginIntent.putExtra("U_list",stringList.U_list);
                             startActivity(LoginIntent);
                             finish();
                         }

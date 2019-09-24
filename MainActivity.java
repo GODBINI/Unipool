@@ -1,6 +1,7 @@
 package com.unipool.unipool;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
@@ -52,11 +53,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private double departure_longitude;
     private double arrival_latitude;
     private double arrival_longitude;
-    String userID2;
+    String userID2,Uni2;
     String trust;
     MapFragment mapFragment = (MapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
-    final StringList stringList = new StringList();
     Dialog dialog;
+    StringList stringList;
+    Spinner Uni_Spinner;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,20 +70,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         db.close();*/
 
         //변수 선언
+        Context context = getApplicationContext();
+        stringList = new StringList(context);
+
         Intent beforeIntent = getIntent();
         final String userID = beforeIntent.getStringExtra("userID");
         final String Uni = beforeIntent.getStringExtra("Uni");
+        final String[] U_list = beforeIntent.getStringArrayExtra("U_list");
         userID2 = userID;
+        Uni2 = Uni;
         final Button home_homeButton = (Button)findViewById(R.id.home_homeButton);
         final Button home_boardButton = (Button)findViewById(R.id.home_boardButton);
         final Button Match_Button = (Button)findViewById(R.id.Match_Button);
         final Button user_setting_Button = (Button)findViewById(R.id.user_setting_Button);
-        final Spinner Uni_Spinner = (Spinner)findViewById(R.id.Uni_Spinner);
+        Uni_Spinner = (Spinner)findViewById(R.id.Uni_Spinner);
         final Spinner Departure_Spinner = (Spinner)findViewById(R.id.Departure_Spinner);
         final Spinner Arrival_Spinner = (Spinner)findViewById(R.id.Arrival_Spinner);
         final LatLngData latLngData = new LatLngData();
 
-        ArrayAdapter UniSpinnerAdapter = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item, stringList.U_list);
+        ArrayAdapter UniSpinnerAdapter = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item,U_list);
+        Uni_Spinner.setAdapter(UniSpinnerAdapter);
 
         // 네비게이션
         final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -133,7 +141,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         };
         drawer.setDrawerListener(drawerListener);
         //
-        Uni_Spinner.setAdapter(UniSpinnerAdapter);
 
         user_setting_Button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -155,6 +162,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 home_boardIntent.putExtra("userID",userID);
                 home_boardIntent.putExtra("trust",trust);
                 home_boardIntent.putExtra("Uni",Uni);
+                home_boardIntent.putExtra("U_list",U_list);
                 startActivity(home_boardIntent);
                 finish();
                 overridePendingTransition(R.anim.anim_slide_out_left,R.anim.anim_slide_in_right);
@@ -227,8 +235,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 uni = i;
                 Departure_Spinner.setAdapter(DepartureAdapter);
                 Arrival_Spinner.setAdapter(ArrivalAdapter);
-                if(i==0)
+                if(i==0) {
                     select = false;
+                }
                 else
                     select = true;
             }
@@ -268,11 +277,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        for (int i=0; i< stringList.U_list.length; i++) {
-            if(stringList.U_list[i].equals(Uni)){
+        for (int i=0; i< U_list.length; i++) {
+            if(U_list[i].equals(Uni)){
                 Uni_Spinner.setSelection(i);
             }
         }
+
     }
     @Override
     public void onBackPressed() {
@@ -398,4 +408,5 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onDestroy();
         dialog.dismiss();
     }
+
 }

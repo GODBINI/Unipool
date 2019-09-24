@@ -41,8 +41,10 @@ public class TrustActivity extends AppCompatActivity {
         final String user_2 = beforeIntent.getStringExtra("user_2");
         final String user_3 = beforeIntent.getStringExtra("user_3");
         final String user_4 = beforeIntent.getStringExtra("user_4");
+        final String[] U_list = beforeIntent.getStringArrayExtra("U_list");
         final int quantity = beforeIntent.getIntExtra("quantity",1);
         final int isBoard = beforeIntent.getIntExtra("isBoard",0);
+        final String Uni = beforeIntent.getStringExtra("Uni");
 
         final TextView trust_userText_1 = (TextView)findViewById(R.id.trust_userText_1);
         final TextView trust_userText_2 = (TextView)findViewById(R.id.trust_userText_2);
@@ -70,6 +72,8 @@ public class TrustActivity extends AppCompatActivity {
             if(isBoard == 1) {
                 Intent MainIntent = new Intent(TrustActivity.this,MainActivity.class);
                 MainIntent.putExtra("userID", userID);
+                MainIntent.putExtra("U_list",U_list);
+                MainIntent.putExtra("Uni",Uni);
                 startActivity(MainIntent);
                 finish();
             }
@@ -148,6 +152,8 @@ public class TrustActivity extends AppCompatActivity {
                                 if(isBoard == 1) {
                                     Intent MainIntent = new Intent(TrustActivity.this,MainActivity.class);
                                     MainIntent.putExtra("userID", userID);
+                                    MainIntent.putExtra("U_list",U_list);
+                                    MainIntent.putExtra("Uni",Uni);
                                     startActivity(MainIntent);
                                     finish();
                                 }

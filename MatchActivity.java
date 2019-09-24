@@ -20,6 +20,7 @@ import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 
 import org.json.JSONObject;
 
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -54,6 +55,10 @@ public class MatchActivity extends AppCompatActivity {
         Match_Ok_Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                StringBuffer id = new StringBuffer();
+                Random random = new Random();
+                id.append((char) ((int) (random.nextInt(26)) + 65));
+                id.append((random.nextInt(10))+1);
                 Response.Listener<String> responseListener = new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {

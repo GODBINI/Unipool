@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BoardRefreshRequest extends StringRequest {
-    final static private String URL = "http://218.155.17.58/BoardRefresh.php";
+    final static private String URL = "http://121.137.115.20/BoardRefresh.php";
     private Map<String, String> parameters;
 
     public BoardRefreshRequest(Response.Listener<String> listener) {

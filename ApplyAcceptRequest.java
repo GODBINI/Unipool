@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ApplyAcceptRequest extends StringRequest {
-    final static private String URL = "http://218.155.17.58/ApplyAccept.php";
+    final static private String URL = "http://121.137.115.20/ApplyAccept.php";
     private Map<String, String> parameters;
 
     public ApplyAcceptRequest(String userID,String leader_user, Response.Listener<String> listener) {
