@@ -1,5 +1,6 @@
 package com.unipool.unipool;
 
+import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -25,13 +27,18 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 public class WriteActivity extends AppCompatActivity {
     Button write_time_button;
+    Button write_date_button;
     TextView write_time_text;
+    TextView write_date_text;
     String msg="";
+    String date_msg = "";
     String school = "";
     final Calendar cal = Calendar.getInstance();
     @Override
@@ -51,6 +58,12 @@ public class WriteActivity extends AppCompatActivity {
         final EditText Comment_Text = (EditText)findViewById(R.id.Comment_Text);
         write_time_button = (Button)findViewById(R.id.write_time_button);
         write_time_text = (TextView) findViewById(R.id.write_time_text);
+        write_date_button = (Button)findViewById(R.id.write_date_button);
+        write_date_text = (TextView) findViewById(R.id.write_date_text);
+        SimpleDateFormat format = new SimpleDateFormat("MM월 dd일");
+        Date time  = new Date();
+        date_msg = format.format(time);
+        write_date_text.setText("출발 날짜 : " + date_msg);
 
         ArrayAdapter SchoolSpinnerAdapter = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item,U_list);
         school_spinner.setAdapter(SchoolSpinnerAdapter);
@@ -85,9 +98,9 @@ public class WriteActivity extends AppCompatActivity {
                             .create()
                             .show();
                 }
-                else if(title.trim().length() < 6 || title.length() > 31) {
+                else if(title.trim().length() < 4 || title.length() > 31) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(WriteActivity.this);
-                    builder.setMessage("제목은 6~30자 사이로 작성해주세요.")
+                    builder.setMessage("제목은 4~30자 사이로 작성해주세요.")
                             .setPositiveButton("확인",null)
                             .create()
                             .show();
@@ -95,6 +108,13 @@ public class WriteActivity extends AppCompatActivity {
                 else if(msg.trim().equals("")) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(WriteActivity.this);
                     builder.setMessage("시간을 설정해주세요.")
+                            .setPositiveButton("확인",null)
+                            .create()
+                            .show();
+                }
+                else if(date_msg.trim().equals("")) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(WriteActivity.this);
+                    builder.setMessage("날짜를 설정해주세요.")
                             .setPositiveButton("확인",null)
                             .create()
                             .show();
@@ -125,7 +145,7 @@ public class WriteActivity extends AppCompatActivity {
                             }
                         }
                     };
-                    WriteRequest writeRequest = new WriteRequest(userID,school,title,"[출발 시간 : "+msg+"]\n"+comment,responseListener);
+                    WriteRequest writeRequest = new WriteRequest(userID,school,title,date_msg+"\n"+msg+" 출발",comment,responseListener);
                     RequestQueue requestQueue = Volley.newRequestQueue(WriteActivity.this);
                     requestQueue.add(writeRequest);
                 }
@@ -138,11 +158,25 @@ public class WriteActivity extends AppCompatActivity {
                 TimePickerDialog timePickerDialog = new TimePickerDialog(WriteActivity.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int i, int i1) {
-                        msg = String.format("%d 시 %d 분", i, i1);
-                        write_time_text.setText("탑승 시간 : "+msg);
+                        msg = String.format("%d시 %d분", i, i1);
+                        write_time_text.setText("출발 시간 : "+msg);
                     }
                 },cal.get(Calendar.HOUR_OF_DAY),cal.get(Calendar.MINUTE),true);
                 timePickerDialog.show();
+            }
+        });
+
+        write_date_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DatePickerDialog datePickerDialog = new DatePickerDialog(WriteActivity.this, new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
+                        date_msg = String.format("%d월 %d일",i1+1,i2);
+                        write_date_text.setText("출발 날짜 : " +date_msg);
+                    }
+                },cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.get(Calendar.DAY_OF_MONTH));
+                datePickerDialog.show();
             }
         });
 

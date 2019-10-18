@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TrustRequest extends StringRequest {
-    final static private String URL = "http://121.137.115.20/Trust.php";
+    final static private String URL = "http://14.49.39.152/UNIPOOL/Trust.php";
     private Map<String, String> parameters;
 
     public TrustRequest(String user_1, boolean user1_like,String user_2, boolean user2_like,String user_3, boolean user3_like,int quantity,Response.Listener<String> listener) {

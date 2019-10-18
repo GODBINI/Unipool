@@ -30,9 +30,9 @@ public class LoginActivity extends AppCompatActivity {
         final EditText pw_inputText = (EditText)findViewById(R.id.pw_inputText);
         final Button RegisterButton = (Button)findViewById(R.id.RegisterButton);
         final Button LoginButton = (Button)findViewById(R.id.LoginButton);
+        final String[] U_list = getIntent().getStringArrayExtra("U_list");
 
         final DBHelper dbHelper = new DBHelper(LoginActivity.this);
-
         RegisterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -60,6 +60,7 @@ public class LoginActivity extends AppCompatActivity {
                                 Intent LoginIntent = new Intent(LoginActivity.this, MainActivity.class);
                                 LoginIntent.putExtra("userID",userID);
                                 LoginIntent.putExtra("Uni",Uni);
+                                LoginIntent.putExtra("U_list",U_list);
                                 startActivity(LoginIntent);
                                 finish();
                             }

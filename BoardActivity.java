@@ -1,6 +1,10 @@
 package com.unipool.unipool;
 
 import android.app.Dialog;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,18 +12,28 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import androidx.annotation.NonNull;
 import com.google.android.material.navigation.NavigationView;
+
+import androidx.core.app.NotificationCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.Build;
 import android.os.Bundle;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -45,8 +59,19 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
     Board_RecyclerAdapter board_recyclerAdapter;
     LinearLayoutManager linearLayoutManager;
     String user;
+    String spinner_uni = "";
     Timer timer;
     Dialog dialog;
+    float pressedX;
+
+    RequestQueue getBoardQueue;
+    RequestQueue applyAcceptQueue;
+    RequestQueue applyRefreshQueue;
+    RequestQueue boardRemoveQueue;
+    RequestQueue boardLeaveQueue;
+    RequestQueue boardCompleteQueue;
+    RequestQueue boardChatQueue;
+    RequestQueue boardRefreshQueue;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +83,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
 
         final String trust = beforeIntent.getStringExtra("trust");
         final String Uni = beforeIntent.getStringExtra("Uni");
+        spinner_uni = Uni;
         final String[] U_list = beforeIntent.getStringArrayExtra("U_list");
         final Button board_homeButton = (Button)findViewById(R.id.board_homeButton);
         final Button board_boardButton = (Button)findViewById(R.id.board_boardButton);
@@ -66,6 +92,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
         final Button Remove_Button = (Button)findViewById(R.id.Remove_Button);
         final Button board_complete_button = (Button)findViewById(R.id.board_complete_button);
         final Button user_setting_Button2 = (Button)findViewById(R.id.user_setting_Button2);
+        final TextView Board_HomeText = (TextView)findViewById(R.id.board_homeText);
 
         final Spinner board_spinner = (Spinner)findViewById(R.id.board_spinner);
         ArrayAdapter boardSpinnerAdapter = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item,U_list);
@@ -87,6 +114,18 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
         final Button nav_chat_button = (Button)nav_headerView.findViewById(R.id.nav_chat_button);
         final LinearLayout party_layout = (LinearLayout)nav_headerView.findViewById(R.id.party_layout);
         final TextView null_Text = (TextView)nav_headerView.findViewById(R.id.null_Text);
+        final LinearLayout BoardLayout = (LinearLayout)findViewById(R.id.BoardLayout);
+
+        final SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.swipe);
+
+        getBoardQueue = Volley.newRequestQueue(BoardActivity.this);
+        applyAcceptQueue = Volley.newRequestQueue(BoardActivity.this);
+        applyRefreshQueue = Volley.newRequestQueue(BoardActivity.this);
+        boardRemoveQueue = Volley.newRequestQueue(BoardActivity.this);
+        boardLeaveQueue = Volley.newRequestQueue(BoardActivity.this);
+        boardCompleteQueue = Volley.newRequestQueue(BoardActivity.this);
+        boardChatQueue = Volley.newRequestQueue(BoardActivity.this);
+        boardRefreshQueue = Volley.newRequestQueue(BoardActivity.this);
 
         DrawerLayout.DrawerListener drawerListener = new DrawerLayout.DrawerListener() {
             @Override
@@ -95,7 +134,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
 
             @Override
             public void onDrawerOpened(@NonNull View view) {
-                board_nav_userID_Text.setText(" 안녕하세요, " + userID+"님");
+                board_nav_userID_Text.setText(" " + userID);
                 Response.Listener<String> responseListener = new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -109,7 +148,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                                 String user_3 = jsonResponse.getString("user_3");
                                 String user_4 = jsonResponse.getString("user_4");
                                 String trust = jsonResponse.getString("trust");
-                                board_nav_userTrust_Text.setText(trust);
+                                board_nav_userTrust_Text.setText(" "+trust);
                                 nav_leader_user.setText(leader_user);
                                 nav_title_Text.setText("<"+title+"> 방");
                                 nav_user_2.setText(user_2);
@@ -131,8 +170,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                     }
                 };
                 GetBoardRequest getBoardRequest = new GetBoardRequest(userID,responseListener);
-                RequestQueue requestQueue = Volley.newRequestQueue(BoardActivity.this);
-                requestQueue.add(getBoardRequest);
+                getBoardQueue.add(getBoardRequest);
             }
 
             @Override
@@ -155,9 +193,8 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
 
         board_RecyclerView.setAdapter(board_recyclerAdapter);
 
-        refresh();
 
-        board_homeButton.setOnClickListener(new View.OnClickListener() {
+        View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dialog = new Dialog(BoardActivity.this);
@@ -174,7 +211,10 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                 overridePendingTransition(R.anim.anim_slide_out_right,R.anim.anim_slide_in_left);
                 finish();
             }
-        });
+        };
+
+        board_homeButton.setOnClickListener(onClickListener);
+        Board_HomeText.setOnClickListener(onClickListener);
 
         board_boardButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -198,8 +238,6 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
         refresh_Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                board_recyclerAdapter.init();
-                board_recyclerAdapter.notifyDataSetChanged();
                 refresh();
             }
         });
@@ -223,6 +261,19 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                             if(success) {
                                 final String apply_user = jsonResponse.getString("apply_user");
                                 String trust = jsonResponse.getString("trust");
+                                NotificationCompat.Builder nbuilder = new NotificationCompat.Builder(BoardActivity.this,"default")
+                                        .setSmallIcon(R.drawable.taxi_icon)
+                                        .setContentTitle("알림")
+                                        .setContentText(apply_user+" 님이 신청하였습니다.\n신뢰도 : "+trust)
+                                        .setDefaults(Notification.DEFAULT_VIBRATE)
+                                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                                        .setAutoCancel(true);
+
+                                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                                if (Build.VERSION.SDK_INT >= 26){
+                                    notificationManager.createNotificationChannel(new NotificationChannel("default", "기본채널", NotificationManager.IMPORTANCE_DEFAULT));
+                                }
+                                notificationManager.notify(1,nbuilder.build());
                                 AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
                                 builder.setMessage(apply_user + "님이 신청하였습니다.\n신뢰도 : " + trust +"점")
                                         .setPositiveButton("수락", new DialogInterface.OnClickListener() {
@@ -234,8 +285,14 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                                                         try {
                                                             JSONObject jsonResponse = new JSONObject(response);
                                                             boolean success = jsonResponse.getBoolean("success");
-                                                            if(!success)
-                                                                Toast.makeText(BoardActivity.this,"승인 실패",Toast.LENGTH_SHORT).show();
+                                                            int onBoard = jsonResponse.getInt("onBoard");
+                                                            if(onBoard == 1) {
+                                                                Toast.makeText(BoardActivity.this,"해당유저는 이미 파티가 존재합니다.",Toast.LENGTH_SHORT).show();
+                                                            }
+                                                            else {
+                                                                if (!success)
+                                                                    Toast.makeText(BoardActivity.this, "승인 실패", Toast.LENGTH_SHORT).show();
+                                                            }
                                                         }
                                                         catch (JSONException e) {
                                                             e.printStackTrace();
@@ -243,8 +300,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                                                     }
                                                 };
                                                 ApplyAcceptRequest applyAcceptRequest = new ApplyAcceptRequest(apply_user,userID,responseListener);
-                                                RequestQueue requestQueue = Volley.newRequestQueue(BoardActivity.this);
-                                                requestQueue.add(applyAcceptRequest);
+                                                applyAcceptQueue.add(applyAcceptRequest);
                                             }
                                         })
                                         .setNegativeButton("거절",null)
@@ -261,8 +317,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                     }
                 };
                 ApplyRefreshRequest applyRefreshRequest = new ApplyRefreshRequest(userID,responseListener);
-                RequestQueue requestQueue = Volley.newRequestQueue(BoardActivity.this);
-                requestQueue.add(applyRefreshRequest);
+                applyRefreshQueue.add(applyRefreshRequest);
             }
         };
         timer = new Timer();
@@ -302,8 +357,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                                     }
                                 };
                                 BoardRemoveRequest boardRemoveRequest = new BoardRemoveRequest(userID,responseListener);
-                                RequestQueue requestQueue = Volley.newRequestQueue(BoardActivity.this);
-                                requestQueue.add(boardRemoveRequest);
+                                boardRemoveQueue.add(boardRemoveRequest);
                             }
                         })
                         .setNegativeButton("아니요",null)
@@ -348,8 +402,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                                     }
                                 };
                                 BoardLeaveRequest boardLeaveRequest = new BoardLeaveRequest(userID,responseListener);
-                                RequestQueue requestQueue = Volley.newRequestQueue(BoardActivity.this);
-                                requestQueue.add(boardLeaveRequest);
+                                boardLeaveQueue.add(boardLeaveRequest);
                             }
                         })
                         .create()
@@ -384,8 +437,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                                     }
                                 };
                                 BoardCompleteRequest boardCompleteRequest = new BoardCompleteRequest(userID,responseListener);
-                                RequestQueue requestQueue = Volley.newRequestQueue(BoardActivity.this);
-                                requestQueue.add(boardCompleteRequest);
+                                boardCompleteQueue.add(boardCompleteRequest);
                             }
                         })
                         .setNegativeButton("아니요",null)
@@ -439,16 +491,78 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                     }
                 };
                 BoardChatRequest boardChatRequest = new BoardChatRequest(userID,responseListener);
-                RequestQueue requestQueue = Volley.newRequestQueue(BoardActivity.this);
-                requestQueue.add(boardChatRequest);
+                boardChatQueue.add(boardChatRequest);
             }
         });
 
+        // 화면 시작시 유저학교에 맞는 학교스피너 선택
         for (int i=0; i< U_list.length; i++) {
             if(U_list[i].equals(Uni)){
                 board_spinner.setSelection(i);
             }
         }
+
+        //학교 선택 스피너
+        board_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                spinner_uni = board_spinner.getItemAtPosition(i) + "";
+                refresh();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        // 밀어서 새로고침
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refresh();
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
+
+        // 드래그 화면전환
+        View.OnTouchListener touchListener = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                float distance = 0;
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        pressedX = motionEvent.getRawX();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        distance = pressedX - motionEvent.getRawX();
+                        break;
+                    default:
+                        break;
+                }
+                if(Math.abs(distance) > 100) {
+                    if(distance < 0) {
+                        dialog = new Dialog(BoardActivity.this);
+                        dialog.setContentView(R.layout.loading);
+                        ImageView imageView = (ImageView)dialog.findViewById(R.id.loading_image);
+                        imageView.setImageResource(R.drawable.loading);
+                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                        dialog.show();
+                        Intent board_homeIntent = new Intent(BoardActivity.this,MainActivity.class);
+                        board_homeIntent.putExtra("userID",userID);
+                        board_homeIntent.putExtra("Uni",Uni);
+                        board_homeIntent.putExtra("U_list",U_list);
+                        startActivity(board_homeIntent);
+                        overridePendingTransition(R.anim.anim_slide_out_right,R.anim.anim_slide_in_left);
+                        finish();
+                    }
+                }
+                return true;
+            }
+        };
+
+        BoardLayout.setOnTouchListener(touchListener);
+        board_RecyclerView.setOnTouchListener(touchListener);
     }
 
     @Override
@@ -464,6 +578,8 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
     }
 
     public void refresh() {
+        board_recyclerAdapter.init();
+        board_recyclerAdapter.notifyDataSetChanged();
         Response.Listener<String> responseListener = new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -471,16 +587,17 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                     JSONObject jsonResponse = new JSONObject(response);
                     JSONArray jsonArray = jsonResponse.getJSONArray("response");
                     int count = 0;
-                    String leader_user,school,title,comment,trust,quantity;
+                    String leader_user,school,title,date,comment,trust,quantity;
                     while (count < jsonArray.length()) {
                         JSONObject jsonObject = jsonArray.getJSONObject(count);
                         leader_user = jsonObject.getString("leader_user");
                         school = jsonObject.getString("school");
                         title = jsonObject.getString("title");
+                        date = jsonObject.getString("date");
                         comment = jsonObject.getString("comment");
                         trust = jsonObject.getString("trust");
                         quantity = jsonObject.getString("quantity");
-                        board_data boardData = new board_data(school,title,comment,leader_user,trust,quantity,user);
+                        board_data boardData = new board_data(school,title,date,comment,leader_user,trust,quantity,user);
                         board_recyclerAdapter.addItem(boardData);
                         board_recyclerAdapter.notifyDataSetChanged();
                         count++;
@@ -491,9 +608,8 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                 }
             }
         };
-        BoardRefreshRequest boardRefreshRequest = new BoardRefreshRequest(responseListener);
-        RequestQueue requestQueue = Volley.newRequestQueue(BoardActivity.this);
-        requestQueue.add(boardRefreshRequest);
+        BoardRefreshRequest boardRefreshRequest = new BoardRefreshRequest(spinner_uni,responseListener);
+        boardRefreshQueue.add(boardRefreshRequest);
     }
 
     @Override

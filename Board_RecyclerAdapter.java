@@ -64,6 +64,7 @@ public class Board_RecyclerAdapter extends RecyclerView.Adapter<Board_RecyclerAd
         private TextView board_leaderuserIDText;
         private TextView board_trustText;
         private TextView board_quantityText;
+        private TextView board_DateText;
         private Button board_requestButton;
         private String user;
         private String leader_user;
@@ -77,15 +78,17 @@ public class Board_RecyclerAdapter extends RecyclerView.Adapter<Board_RecyclerAd
             board_trustText = itemView.findViewById(R.id.board_trustText);
             board_quantityText = itemView.findViewById(R.id.board_quantityText);
             board_requestButton = itemView.findViewById(R.id.board_requestButton);
+            board_DateText = itemView.findViewById(R.id.board_DateText);
         }
 
         void onBind(board_data data) {
             board_schoolText.setText(data.getBoard_schoolText());
             board_titleText.setText(data.getBoard_titleText());
             board_commentText.setText(data.getBoard_commentText());
-            board_leaderuserIDText.setText(data.getBoard_userIDText() + "님");
+            board_leaderuserIDText.setText(data.getBoard_userIDText());
             leader_user = data.getBoard_userIDText();
-            board_trustText.setText(data.getBoard_trustText() + "점");
+            board_trustText.setText(data.getBoard_trustText());
+            board_DateText.setText(data.getBoard_DateText());
             user = data.getUser();
             final String quantity = data.getBoard_quantityText();
             if(quantity.equals("1"))

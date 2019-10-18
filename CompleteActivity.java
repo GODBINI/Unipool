@@ -28,13 +28,21 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class CompleteActivity extends AppCompatActivity {
+    public static final String TAG = "100";
     Timer timer;
     Timer timer2;
     int is_board;
     int u_count = 0;
+    int temp = 0;
     InputMethodManager inputMethodManager;
     EditText chat_EditText;
     LinearLayout linearLayout;
+
+    ChatRefreshRequest chatRefreshRequest;
+    RequestQueue chatQueue;
+    RequestQueue completeQueue;
+    ArriveRefreshRequest arriveRefreshRequest;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +75,7 @@ public class CompleteActivity extends AppCompatActivity {
 
         chat_EditText = (EditText)findViewById(R.id.chat_EditText);
         linearLayout = (LinearLayout)findViewById(R.id.complete_layout);
+
 
         final RecyclerView chat_RecyclerView = (RecyclerView)findViewById(R.id.chat_RecyclerView);
         final RecyclerAdapter recyclerAdapter = new RecyclerAdapter();
@@ -155,9 +164,16 @@ public class CompleteActivity extends AppCompatActivity {
             }
         });
 
+        chatQueue = Volley.newRequestQueue(CompleteActivity.this);
+
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
+                /*if (chatQueue != null) {
+                    chatQueue.cancelAll(TAG);
+                } */
+                temp++;
+                System.out.println("counter: "+temp);
                 Response.Listener<String> responseListener = new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -189,23 +205,28 @@ public class CompleteActivity extends AppCompatActivity {
                         }
                     }
                 };
-                ChatRefreshRequest chatRefreshRequest;
                 if(isBoard == 1) {
                     chatRefreshRequest = new ChatRefreshRequest(userID, arrival, responseListener);
                 }
                 else {
                     chatRefreshRequest = new ChatRefreshRequest(userID, departure+user_1, responseListener);
                 }
-                RequestQueue requestQueue = Volley.newRequestQueue(CompleteActivity.this);
-                requestQueue.add(chatRefreshRequest);
+                chatRefreshRequest.setTag(TAG);
+                chatQueue.add(chatRefreshRequest);
             }
         };
         timer = new Timer();
         timer.schedule(timerTask,0,500);
 
+
+        completeQueue = Volley.newRequestQueue(CompleteActivity.this);
         TimerTask timerTask2 = new TimerTask() {
+
             @Override
             public void run() {
+                /*if (completeQueue != null) {
+                    completeQueue.cancelAll(TAG);
+                } */
                 Response.Listener<String> responseListener = new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -251,9 +272,9 @@ public class CompleteActivity extends AppCompatActivity {
                         }
                     }
                 };
-                ArriveRefreshRequest arriveRefreshRequest = new ArriveRefreshRequest(userID,responseListener);
-                RequestQueue requestQueue = Volley.newRequestQueue(CompleteActivity.this);
-                requestQueue.add(arriveRefreshRequest);
+                arriveRefreshRequest = new ArriveRefreshRequest(userID,responseListener);
+                arriveRefreshRequest.setTag(TAG);
+                completeQueue.add(arriveRefreshRequest);
             }
         };
         timer2 = new Timer();

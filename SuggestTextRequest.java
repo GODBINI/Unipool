@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SuggestTextRequest extends StringRequest {
-    final static private String URL = "http://121.137.115.20/SuggestText.php";
+    final static private String URL = "http://14.49.39.152/UNIPOOL/SuggestText.php";
     private Map<String, String> parameters;
 
     public SuggestTextRequest(String userID, String text, Response.Listener<String> listener) {

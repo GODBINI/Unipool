@@ -7,11 +7,13 @@ public class board_data {
     private String board_userIDText;
     private String board_trustText;
     private String board_quantityText;
+    private String board_DateText;
     private String user;
 
-    public board_data(String board_schoolText, String board_titleText, String board_commentText,String board_userIDText,String board_trustText,String board_quantityText,String user) {
+    public board_data(String board_schoolText, String board_titleText,String board_DateText, String board_commentText,String board_userIDText,String board_trustText,String board_quantityText,String user) {
         this.board_schoolText = board_schoolText;
         this.board_titleText = board_titleText;
+        this.board_DateText = board_DateText;
         this.board_commentText = board_commentText;
         this.board_userIDText = board_userIDText;
         this.board_trustText = board_trustText;
@@ -47,6 +49,10 @@ public class board_data {
         return user;
     }
 
+    public String getBoard_DateText() {
+        return board_DateText;
+    }
+
     public void setBoard_commentText(String board_commentText) {
         this.board_commentText = board_commentText;
     }
@@ -73,5 +79,9 @@ public class board_data {
 
     public void setUser(String user) {
         this.user = user;
+    }
+
+    public void setBoard_DateText(String board_DateText) {
+        this.board_DateText = board_DateText;
     }
 }

@@ -26,6 +26,8 @@ import java.util.TimerTask;
 
 public class MatchActivity extends AppCompatActivity {
     Timer timer;
+    RequestQueue completeQueue;
+    int count = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +49,8 @@ public class MatchActivity extends AppCompatActivity {
         final TextView match_leader_Text = (TextView)findViewById(R.id.match_leader_Text);
         final Button Match_Ok_Button = (Button)findViewById(R.id.Match_Ok_Button);
         final Button Match_Cancel_Button = (Button)findViewById(R.id.Match_Cancel_Button);
+
+        completeQueue =  Volley.newRequestQueue(MatchActivity.this);
         // 변수 설정
 
 
@@ -140,7 +144,8 @@ public class MatchActivity extends AppCompatActivity {
                                     Match_Ok_Button.setVisibility(View.GONE);
                                     match_leader_Text.setVisibility(View.GONE);
                                 }
-                                if(complete==1) {
+                                if(complete==1 && count ==0) {
+                                    count++;
                                     Intent CompleteIntent = new Intent(MatchActivity.this,CompleteActivity.class);
                                     CompleteIntent.putExtra("userID",userID);
                                     CompleteIntent.putExtra("departure",departure);
@@ -164,8 +169,7 @@ public class MatchActivity extends AppCompatActivity {
                 };
                 //
                 RefreshRequest refreshRequest = new RefreshRequest(userID,departure,arrival,responseListener);
-                RequestQueue requestQueue =  Volley.newRequestQueue(MatchActivity.this);
-                requestQueue.add(refreshRequest);
+                completeQueue.add(refreshRequest);
             }
         };
         timer = new Timer();

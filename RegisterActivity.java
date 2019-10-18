@@ -10,9 +10,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
@@ -27,8 +30,9 @@ public class RegisterActivity extends AppCompatActivity {
     LinearLayout linearLayout;
     EditText Register_idText;
     EditText Register_pwText;
-    EditText Register_UniText;
     EditText Register_accountText;
+    Spinner Register_spinner;
+    String Uni;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,15 +42,31 @@ public class RegisterActivity extends AppCompatActivity {
         final String email = getIntent().getStringExtra("email");
         final Button Register_OkButton = (Button)findViewById(R.id.Register_OkButton);
         final Button Register_CancelButton = (Button)findViewById(R.id.Register_CancelButton);
+        Context context = getApplicationContext();
+        final StringList stringList = new StringList(context);
         Register_idText = (EditText)findViewById(R.id.Register_idText);
         Register_pwText = (EditText)findViewById(R.id.Register_pwText);
-        Register_UniText = (EditText)findViewById(R.id.Register_UniText);
+        Register_spinner = (Spinner)findViewById(R.id.Register_spinner);
         Register_accountText = (EditText)findViewById(R.id.Register_accountText);
 
         linearLayout = (LinearLayout)findViewById(R.id.register_layout);
         inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
         linearLayout.setOnClickListener(myClickListener);
+        ArrayAdapter RegisterSpinnerAdapter = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item,stringList.U_list);
+        Register_spinner.setAdapter(RegisterSpinnerAdapter);
+
+        Register_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                Uni = Register_spinner.getItemAtPosition(i) +"";
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
 
         Register_CancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,14 +80,13 @@ public class RegisterActivity extends AppCompatActivity {
             public void onClick(View view) {
                 final String userID = Register_idText.getText().toString();
                 final String userPW = Register_pwText.getText().toString();
-                final String Uni = Register_UniText.getText().toString();
                 final String Account = Register_accountText.getText().toString();
                 if (userID.trim().equals(""))
                     Toast.makeText(RegisterActivity.this, "아이디를 입력해주세요.", Toast.LENGTH_SHORT).show();
                 else if (userPW.trim().equals(""))
                     Toast.makeText(RegisterActivity.this, "비밀번호를 입력해주세요.", Toast.LENGTH_SHORT).show();
-                else if (Uni.trim().equals(""))
-                    Toast.makeText(RegisterActivity.this, "대학교 명을 입력해주세요.", Toast.LENGTH_SHORT).show();
+                else if (Uni.trim().equals("대학교") || Uni.trim().equals(""))
+                    Toast.makeText(RegisterActivity.this, "대학교를 선택해주세요.", Toast.LENGTH_SHORT).show();
                 else if (userID.trim().length() < 4 || userID.length() > 19)
                     Toast.makeText(RegisterActivity.this, "ID는 4~20자의 문자만 사용가능합니다.", Toast.LENGTH_SHORT).show();
                 else {
@@ -154,7 +173,6 @@ public class RegisterActivity extends AppCompatActivity {
     {
         inputMethodManager.hideSoftInputFromWindow(Register_idText.getWindowToken(), 0);
         inputMethodManager.hideSoftInputFromWindow(Register_pwText.getWindowToken(), 0);
-        inputMethodManager.hideSoftInputFromWindow(Register_UniText.getWindowToken(), 0);
         inputMethodManager.hideSoftInputFromWindow(Register_accountText.getWindowToken(), 0);
     }
 

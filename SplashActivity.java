@@ -86,6 +86,7 @@ public class SplashActivity extends AppCompatActivity {
         }
         else {
             Intent SplashIntent = new Intent(this, LoginActivity.class);
+            SplashIntent.putExtra("U_list",stringList.U_list);
             startActivity(SplashIntent);
             finish();
         }

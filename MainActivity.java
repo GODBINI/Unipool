@@ -14,13 +14,19 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,21 +59,29 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private double departure_longitude;
     private double arrival_latitude;
     private double arrival_longitude;
+    float pressedX;
     String userID2,Uni2;
     String trust;
     MapFragment mapFragment = (MapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
     Dialog dialog;
     StringList stringList;
     Spinner Uni_Spinner;
+    Spinner Departure_Spinner;
+    Spinner Arrival_Spinner;
+    Button Match_Button;
+
+    RequestQueue quickchatQueue;
+    RequestQueue getTrustQueue;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_draw);
 
+        //sqlite 초기화
         /*final DBHelper dbHelper = new DBHelper(MainActivity.this);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.execSQL("delete from login_info");
-        db.close();*/
+        db.close(); */
 
         //변수 선언
         Context context = getApplicationContext();
@@ -81,16 +95,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Uni2 = Uni;
         final Button home_homeButton = (Button)findViewById(R.id.home_homeButton);
         final Button home_boardButton = (Button)findViewById(R.id.home_boardButton);
-        final Button Match_Button = (Button)findViewById(R.id.Match_Button);
+        Match_Button = (Button)findViewById(R.id.Match_Button);
         final Button user_setting_Button = (Button)findViewById(R.id.user_setting_Button);
+        final TextView home_boardText = (TextView)findViewById(R.id.home_boardText);
         Uni_Spinner = (Spinner)findViewById(R.id.Uni_Spinner);
-        final Spinner Departure_Spinner = (Spinner)findViewById(R.id.Departure_Spinner);
-        final Spinner Arrival_Spinner = (Spinner)findViewById(R.id.Arrival_Spinner);
+        Departure_Spinner = (Spinner)findViewById(R.id.Departure_Spinner);
+        Arrival_Spinner = (Spinner)findViewById(R.id.Arrival_Spinner);
         final LatLngData latLngData = new LatLngData();
+
+        getTrustQueue = Volley.newRequestQueue(MainActivity.this);
+        quickchatQueue = Volley.newRequestQueue(MainActivity.this);
 
         ArrayAdapter UniSpinnerAdapter = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item,U_list);
         Uni_Spinner.setAdapter(UniSpinnerAdapter);
-
         // 네비게이션
         final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -98,6 +115,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         View nav_headerView = navigationView.getHeaderView(0);
         final TextView nav_userID_Text = (TextView)nav_headerView.findViewById(R.id.nav_userID_Text);
         final TextView nav_userTrust_Text = (TextView)nav_headerView.findViewById(R.id.nav_userTrust_Text);
+        final Button main_chat_Button = (Button)nav_headerView.findViewById(R.id.main_nav_chat_button);
+        final Button inform_Button = (Button)nav_headerView.findViewById(R.id.inform_Button);
+        final Button suggestion_Button = (Button)nav_headerView.findViewById(R.id.suggestion_Button);
+        final ImageView navInfoImage = (ImageView)nav_headerView.findViewById(R.id.navInfoImage);
+        final LinearLayout MainLayout = (LinearLayout)findViewById(R.id.MainLayout);
+
+        //GuideIntent();
 
         DrawerLayout.DrawerListener drawerListener = new DrawerLayout.DrawerListener() {
             @Override
@@ -107,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void onDrawerOpened(@NonNull View view) {
-                nav_userID_Text.setText("  안녕하세요,"+userID + "님");
+                nav_userID_Text.setText("  "+userID);
                 Response.Listener<String> responseListener = new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -116,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             boolean success = jsonResponse.getBoolean("success");
                             trust = jsonResponse.getString("trust");
                             if(success) {
-                                nav_userTrust_Text.setText("신뢰도 : " + trust + "점");
+                                nav_userTrust_Text.setText(" "+trust);
                             }
                         }
                         catch (JSONException e) {
@@ -125,8 +149,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 };
                 GetTrustRequest getTrustRequest = new GetTrustRequest(userID,responseListener);
-                RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
-                requestQueue.add(getTrustRequest);
+                getTrustQueue.add(getTrustRequest);
             }
 
             @Override
@@ -142,6 +165,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         drawer.setDrawerListener(drawerListener);
         //
 
+
         user_setting_Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -149,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
         // 버튼클릭 리스너
-        home_boardButton.setOnClickListener(new View.OnClickListener() {
+        View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dialog = new Dialog(MainActivity.this);
@@ -167,7 +191,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 finish();
                 overridePendingTransition(R.anim.anim_slide_out_left,R.anim.anim_slide_in_right);
             }
-        });
+        };
+
+        home_boardButton.setOnClickListener(onClickListener);
+        home_boardText.setOnClickListener(onClickListener);
 
         home_homeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -277,12 +304,153 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        for (int i=0; i< U_list.length; i++) {
-            if(U_list[i].equals(Uni)){
-                Uni_Spinner.setSelection(i);
+        Handler delayHandler = new Handler();
+        delayHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                // TODO
+                for (int i=0; i< U_list.length; i++) {
+                    if(U_list[i].equals(Uni)){
+                        Uni_Spinner.setSelection(i);
+                    }
+                }
             }
-        }
+        }, 500);
 
+        inform_Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawer.closeDrawer(GravityCompat.START);
+                Intent intent = new Intent(MainActivity.this,InformChangeActivity.class);
+                intent.putExtra("userID",userID);
+                startActivity(intent);
+                overridePendingTransition(R.anim.anim_slide_out_left,R.anim.anim_slide_in_right);
+            }
+        });
+
+        suggestion_Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawer.closeDrawer(GravityCompat.START);
+                Intent intent = new Intent(MainActivity.this,SuggestActivity.class);
+                intent.putExtra("userID",userID);
+                startActivity(intent);
+                overridePendingTransition(R.anim.anim_slide_out_left,R.anim.anim_slide_in_right);
+            }
+        });
+
+        main_chat_Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Response.Listener<String> responseListener = new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject jsonResponse = new JSONObject(response);
+                            boolean success = jsonResponse.getBoolean("success");
+                            if(success) {
+                                String departure = jsonResponse.getString("departure");
+                                String arrival = jsonResponse.getString("arrival");
+                                String user_1 = jsonResponse.getString("user_1");
+                                String user_2 = jsonResponse.getString("user_2");
+                                String user_3 = jsonResponse.getString("user_3");
+                                String user_4 = jsonResponse.getString("user_4");
+                                int quantity = jsonResponse.getInt("quantity");
+                                Intent BoardCompleteIntent = new Intent(MainActivity.this,CompleteActivity.class);
+                                BoardCompleteIntent.putExtra("departure",departure);
+                                BoardCompleteIntent.putExtra("arrival",arrival);
+                                BoardCompleteIntent.putExtra("userID",userID);
+                                BoardCompleteIntent.putExtra("user_1",user_1);
+                                BoardCompleteIntent.putExtra("user_2",user_2);
+                                BoardCompleteIntent.putExtra("user_3",user_3);
+                                BoardCompleteIntent.putExtra("user_4",user_4);
+                                BoardCompleteIntent.putExtra("quantity",quantity);
+                                BoardCompleteIntent.putExtra("isBoard",0);
+                                BoardCompleteIntent.putExtra("U_list",U_list);
+                                BoardCompleteIntent.putExtra("Uni",Uni);
+                                startActivity(BoardCompleteIntent);
+                            }
+                            else {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                                builder.setMessage("참여한 퀵매치가 존재하지 않습니다.")
+                                        .setPositiveButton("확인",null)
+                                        .create()
+                                        .show();
+                            }
+                        }
+                        catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                };
+                QuickChatRequest quickChatRequest = new QuickChatRequest(userID,responseListener);
+                quickchatQueue.add(quickChatRequest);
+            }
+        });
+
+        navInfoImage.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                int x,y;
+                switch (motionEvent.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN:
+                        x = (int) motionEvent.getRawX();
+                        y = (int) motionEvent.getRawY();
+                        Toast toast = Toast.makeText(MainActivity.this,"",Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP | Gravity.LEFT,x,y);
+                        TextView tvToastMsg = new TextView(MainActivity.this);
+                        tvToastMsg.setText(" 다른유저가 사용자를 판단할수있는 신뢰도 점수입니다.\n\n"+
+                                "*신뢰도 평가시*\n좋음 : +2점\n나쁨 : -3점");
+                        tvToastMsg.setTextColor(Color.BLACK);
+                        tvToastMsg.setTextSize(16);
+                        tvToastMsg.setBackgroundColor(Color.WHITE);
+                        toast.setView(tvToastMsg);
+                        toast.show();
+                        break;
+
+                        default:
+                        break;
+                }
+                return false;
+            }
+        });
+
+        MainLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                float distance = 0;
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        pressedX = motionEvent.getRawX();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        distance = pressedX - motionEvent.getRawX();
+                        break;
+                    default:
+                        break;
+                }
+                if(Math.abs(distance) > 100) {
+                    if(distance > 0) {
+                        dialog = new Dialog(MainActivity.this);
+                        dialog.setContentView(R.layout.loading);
+                        ImageView imageView = (ImageView)dialog.findViewById(R.id.loading_image);
+                        imageView.setImageResource(R.drawable.loading);
+                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                        dialog.show();
+                        Intent home_boardIntent = new Intent(MainActivity.this, BoardActivity.class);
+                        home_boardIntent.putExtra("userID",userID);
+                        home_boardIntent.putExtra("trust",trust);
+                        home_boardIntent.putExtra("Uni",Uni);
+                        home_boardIntent.putExtra("U_list",U_list);
+                        startActivity(home_boardIntent);
+                        finish();
+                        overridePendingTransition(R.anim.anim_slide_out_left,R.anim.anim_slide_in_right);
+                    }
+                }
+                return true;
+            }
+        });
     }
     @Override
     public void onBackPressed() {
@@ -378,15 +546,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            Intent intent = new Intent(MainActivity.this,InformChangeActivity.class);
-            intent.putExtra("userID",userID2);
-            startActivity(intent);
-            overridePendingTransition(R.anim.anim_slide_out_left,R.anim.anim_slide_in_right);
         } else if (id == R.id.nav_gallery) {
-            Intent intent = new Intent(MainActivity.this,SuggestActivity.class);
-            intent.putExtra("userID",userID2);
-            startActivity(intent);
-            overridePendingTransition(R.anim.anim_slide_out_left,R.anim.anim_slide_in_right);
 
         } else if (id == R.id.nav_slideshow) {
 
@@ -408,5 +568,36 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onDestroy();
         dialog.dismiss();
     }
+
+    public void GuideIntent () {
+        Intent GuideIntent = new Intent(MainActivity.this,GuideActivity.class);
+        final int [] U = new int[2];
+        final int [] D = new int[2];
+        final int [] A = new int[2];
+        final int [] M = new int[2];
+        Uni_Spinner.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                Uni_Spinner.getViewTreeObserver().removeOnPreDrawListener(this);
+                //여기서 뷰의 크기를 가져온다.
+                Uni_Spinner.getLocationOnScreen(U);
+                return true;
+            }
+        });
+        Uni_Spinner.getLocationOnScreen(U);
+        Departure_Spinner.getLocationOnScreen(D);
+        Arrival_Spinner.getLocationOnScreen(A);
+        Match_Button.getLocationOnScreen(M);
+        GuideIntent.putExtra("UX",U[0]);
+        GuideIntent.putExtra("UY",U[1]);
+        GuideIntent.putExtra("DX",Departure_Spinner.getX());
+        GuideIntent.putExtra("DY",Departure_Spinner.getY());
+        GuideIntent.putExtra("AX",Arrival_Spinner.getX());
+        GuideIntent.putExtra("AY",Arrival_Spinner.getY());
+        GuideIntent.putExtra("MX",Match_Button.getX() + Match_Button.getWidth()/2);
+        GuideIntent.putExtra("MY",Match_Button.getY() + Match_Button.getHeight()/2);
+        startActivity(GuideIntent);
+    }
+
 
 }

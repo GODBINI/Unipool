@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ArriveRequest extends StringRequest {
-    final static private String URL = "http://121.137.115.20/Arrive.php";
+    final static private String URL = "http://14.49.39.152/UNIPOOL/Arrive.php";
     private Map<String,String> parameters;
 
     public ArriveRequest(String user_1,String user_2,String user_3,String user_4,int isBoard,String title, Response.Listener<String> listener) {

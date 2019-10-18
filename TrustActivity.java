@@ -22,9 +22,9 @@ import org.json.JSONObject;
 
 public class TrustActivity extends AppCompatActivity {
 
-    boolean user1_like = false;
-    boolean user2_like = false;
-    boolean user3_like = false;
+    boolean user1_like = true;
+    boolean user2_like = true;
+    boolean user3_like = true;
 
     String trust_user_1 = "";
     String trust_user_2 = "";
@@ -119,7 +119,7 @@ public class TrustActivity extends AppCompatActivity {
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
                 if (i==R.id.user1_like_button)  user1_like = true;
                 else if (i==R.id.user1_dislike_button) user1_like = false;
-                Toast.makeText(TrustActivity.this,user1_like+"",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(TrustActivity.this,user1_like+"",Toast.LENGTH_SHORT).show();
             }
         });
 
