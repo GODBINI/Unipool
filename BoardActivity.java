@@ -4,8 +4,6 @@ import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -31,7 +29,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -72,6 +69,9 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
     RequestQueue boardCompleteQueue;
     RequestQueue boardChatQueue;
     RequestQueue boardRefreshQueue;
+
+    Button nav_headerOptionButton;
+    Button nav_headerUpdateButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,9 +90,9 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
         final Button Write_Button = (Button)findViewById(R.id.Write_Button);
         final Button refresh_Button = (Button)findViewById(R.id.refresh_Button);
         final Button Remove_Button = (Button)findViewById(R.id.Remove_Button);
-        final Button board_complete_button = (Button)findViewById(R.id.board_complete_button);
         final Button user_setting_Button2 = (Button)findViewById(R.id.user_setting_Button2);
         final TextView Board_HomeText = (TextView)findViewById(R.id.board_homeText);
+
 
         final Spinner board_spinner = (Spinner)findViewById(R.id.board_spinner);
         ArrayAdapter boardSpinnerAdapter = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item,U_list);
@@ -112,9 +112,14 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
         final TextView nav_user_4 = (TextView)nav_headerView.findViewById(R.id.nav_user_4);
         final Button nav_leave_button = (Button)nav_headerView.findViewById(R.id.nav_leave_button);
         final Button nav_chat_button = (Button)nav_headerView.findViewById(R.id.nav_chat_button);
+        final Button board_inform_Button = (Button)nav_headerView.findViewById(R.id.board_inform_Button);
+        final Button board_suggestion_Button = (Button)nav_headerView.findViewById(R.id.board_suggestion_Button);
+        final Button nav_complete_Button = (Button)nav_headerView.findViewById(R.id.nav_complete_Button);
         final LinearLayout party_layout = (LinearLayout)nav_headerView.findViewById(R.id.party_layout);
-        final TextView null_Text = (TextView)nav_headerView.findViewById(R.id.null_Text);
         final LinearLayout BoardLayout = (LinearLayout)findViewById(R.id.BoardLayout);
+        final ImageView nav_headerInfoImage = (ImageView)nav_headerView.findViewById(R.id.nav_headerInfoImage);
+        nav_headerOptionButton = (Button)nav_headerView.findViewById(R.id.nav_headerOptionButton);
+        nav_headerUpdateButton = (Button)nav_headerView.findViewById(R.id.nav_headerUpdateButton);
 
         final SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.swipe);
 
@@ -156,11 +161,15 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                                 nav_user_4.setText(user_4);
                                 if(title.equals("null")) {
                                     party_layout.setVisibility(View.GONE);
-                                    null_Text.setVisibility(View.VISIBLE);
                                 }
                                 else {
                                     party_layout.setVisibility(View.VISIBLE);
-                                    null_Text.setVisibility(View.GONE);
+                                    if(userID.equals(leader_user)) {
+                                        nav_headerUpdateButton.setVisibility(View.VISIBLE);
+                                    }
+                                    else {
+                                        nav_headerUpdateButton.setVisibility(View.GONE);
+                                    }
                                 }
                             }
                         }
@@ -231,6 +240,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                 Write_Intent.putExtra("trust",trust);
                 Write_Intent.putExtra("Uni",Uni);
                 Write_Intent.putExtra("U_list",U_list);
+                Write_Intent.putExtra("isUpdate",0);
                 startActivity(Write_Intent);
             }
         });
@@ -410,7 +420,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
             }
         });
 
-        board_complete_button.setOnClickListener(new View.OnClickListener() {
+        nav_complete_Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
@@ -425,7 +435,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                                             JSONObject jsonResponse = new JSONObject(response);
                                             boolean success = jsonResponse.getBoolean("success");
                                             if(success) {
-                                                Toast.makeText(BoardActivity.this,"모집 완료.",Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(BoardActivity.this,"모집 완료",Toast.LENGTH_SHORT).show();
                                             }
                                             else {
                                                 Toast.makeText(BoardActivity.this,"파티가 존재하지 않거나 리더가 아닙니다.",Toast.LENGTH_SHORT).show();
@@ -563,6 +573,81 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
 
         BoardLayout.setOnTouchListener(touchListener);
         board_RecyclerView.setOnTouchListener(touchListener);
+
+        //버튼 리스너
+        board_inform_Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawer.closeDrawer(GravityCompat.START);
+                Intent intent = new Intent(BoardActivity.this,InformChangeActivity.class);
+                intent.putExtra("userID",user);
+                startActivity(intent);
+                overridePendingTransition(R.anim.anim_slide_out_left,R.anim.anim_slide_in_right);
+            }
+        });
+
+        board_suggestion_Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawer.closeDrawer(GravityCompat.START);
+                Intent intent = new Intent(BoardActivity.this,SuggestActivity.class);
+                intent.putExtra("userID",user);
+                startActivity(intent);
+                overridePendingTransition(R.anim.anim_slide_out_left,R.anim.anim_slide_in_right);
+            }
+        });
+
+        nav_headerOptionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawer.closeDrawer(GravityCompat.START);
+                Intent intent = new Intent(BoardActivity.this,OptionActivity.class);
+                intent.putExtra("userID",user);
+                startActivity(intent);
+                overridePendingTransition(R.anim.anim_slide_out_left,R.anim.anim_slide_in_right);
+            }
+        });
+
+        nav_headerUpdateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent Write_Intent = new Intent(BoardActivity.this,WriteActivity.class);
+                Write_Intent.putExtra("userID",userID);
+                Write_Intent.putExtra("trust",trust);
+                Write_Intent.putExtra("Uni",Uni);
+                Write_Intent.putExtra("U_list",U_list);
+                Write_Intent.putExtra("isUpdate",1);
+                startActivity(Write_Intent);
+            }
+        });
+
+        nav_headerInfoImage.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                int x,y;
+                switch (motionEvent.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN:
+                        x = (int) motionEvent.getRawX();
+                        y = (int) motionEvent.getRawY();
+                        Toast toast = Toast.makeText(BoardActivity.this,"",Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP | Gravity.LEFT,x,y);
+                        TextView tvToastMsg = new TextView(BoardActivity.this);
+                        tvToastMsg.setText(" 다른유저가 사용자를 판단할수있는 신뢰도 점수입니다.\n\n"+
+                                "*신뢰도 평가시*\n좋음 : +2점\n나쁨 : -3점");
+                        tvToastMsg.setTextColor(Color.BLACK);
+                        tvToastMsg.setTextSize(16);
+                        tvToastMsg.setBackgroundColor(Color.WHITE);
+                        toast.setView(tvToastMsg);
+                        toast.show();
+                        break;
+
+                    default:
+                        break;
+                }
+                return false;
+            }
+        });
     }
 
     @Override
@@ -648,15 +733,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            Intent intent = new Intent(BoardActivity.this,InformChangeActivity.class);
-            intent.putExtra("userID",user);
-            startActivity(intent);
-            overridePendingTransition(R.anim.anim_slide_out_left,R.anim.anim_slide_in_right);
         } else if (id == R.id.nav_gallery) {
-            Intent intent = new Intent(BoardActivity.this,SuggestActivity.class);
-            intent.putExtra("userID",user);
-            startActivity(intent);
-            overridePendingTransition(R.anim.anim_slide_out_left,R.anim.anim_slide_in_right);
 
         } else if (id == R.id.nav_slideshow) {
 

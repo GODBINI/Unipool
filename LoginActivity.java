@@ -55,7 +55,7 @@ public class LoginActivity extends AppCompatActivity {
                             String Uni = jsonResponse.getString("Uni");
                             if(success) {
                                 SQLiteDatabase wdb = dbHelper.getWritableDatabase();
-                                wdb.execSQL("insert into login_info(userID,userPW,uni) values(?,?,?)",new String[]{userID,userPW,Uni});
+                                wdb.execSQL("insert into login_info(userID,userPW,uni,map) values(?,?,?,1)",new String[]{userID,userPW,Uni});
                                 wdb.close();
                                 Intent LoginIntent = new Intent(LoginActivity.this, MainActivity.class);
                                 LoginIntent.putExtra("userID",userID);

@@ -3,6 +3,7 @@ package com.unipool.unipool;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -21,7 +22,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -62,13 +62,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     float pressedX;
     String userID2,Uni2;
     String trust;
-    MapFragment mapFragment = (MapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
     Dialog dialog;
     StringList stringList;
     Spinner Uni_Spinner;
     Spinner Departure_Spinner;
     Spinner Arrival_Spinner;
     Button Match_Button;
+    Button nav_opiton_Button;
+    int map;
+    MapFragment NmapFragment;
 
     RequestQueue quickchatQueue;
     RequestQueue getTrustQueue;
@@ -77,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_draw);
 
-        //sqlite 초기화
+        //sqlite
         /*final DBHelper dbHelper = new DBHelper(MainActivity.this);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.execSQL("delete from login_info");
@@ -86,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //변수 선언
         Context context = getApplicationContext();
         stringList = new StringList(context);
-
+        final MapFragment mapFragment = (MapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
         Intent beforeIntent = getIntent();
         final String userID = beforeIntent.getStringExtra("userID");
         final String Uni = beforeIntent.getStringExtra("Uni");
@@ -120,8 +122,42 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         final Button suggestion_Button = (Button)nav_headerView.findViewById(R.id.suggestion_Button);
         final ImageView navInfoImage = (ImageView)nav_headerView.findViewById(R.id.navInfoImage);
         final LinearLayout MainLayout = (LinearLayout)findViewById(R.id.MainLayout);
+        final LinearLayout mapLayout = (LinearLayout)findViewById(R.id.mapLayout);
+        nav_opiton_Button = (Button)nav_headerView.findViewById(R.id.nav_option_Button);
 
         //GuideIntent();
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                final DBHelper dbHelper = new DBHelper(MainActivity.this);
+                SQLiteDatabase db = dbHelper.getReadableDatabase();
+                Cursor cursor = db.rawQuery("select map from login_info",null);
+                if(cursor.getCount() != 0) {
+                    while (cursor.moveToNext()) {
+                        map = cursor.getInt(0);
+                    }
+                    if(map==0) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mapFragment.getView().setVisibility(View.INVISIBLE);
+                                mapLayout.setVisibility(View.INVISIBLE);
+                            }
+                        });
+                    }
+                    else {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mapFragment.getView().setVisibility(View.VISIBLE);
+                                mapLayout.setVisibility(View.VISIBLE);
+                            }
+                        });
+                    }
+                }
+            }
+        }, 0);
 
         DrawerLayout.DrawerListener drawerListener = new DrawerLayout.DrawerListener() {
             @Override
@@ -280,9 +316,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 departure = "" + Departure_Spinner.getItemAtPosition(i);
                 departure_latitude = latLngData.Departure_latitude[uni][i];
                 departure_longitude = latLngData.Departure_longitude[uni][i];
-                mapFragment = MapFragment.newInstance();
-                getSupportFragmentManager().beginTransaction().add(R.id.map, mapFragment).commit();
-                mapFragment.getMapAsync(MainActivity.this);
+                NmapFragment = MapFragment.newInstance();
+                getSupportFragmentManager().beginTransaction().add(R.id.map, NmapFragment).commit();
+                NmapFragment.getMapAsync(MainActivity.this);
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
@@ -295,9 +331,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 arrival = "" + Arrival_Spinner.getItemAtPosition(i);
                 arrival_latitude = latLngData.Arrival_latitude[uni][i];
                 arrival_longitude = latLngData.Arrival_longitude[uni][i];
-                mapFragment = MapFragment.newInstance();
-                getSupportFragmentManager().beginTransaction().add(R.id.map, mapFragment).commit();
-                mapFragment.getMapAsync(MainActivity.this);
+                NmapFragment = MapFragment.newInstance();
+                getSupportFragmentManager().beginTransaction().add(R.id.map,NmapFragment).commit();
+                NmapFragment.getMapAsync(MainActivity.this);
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
@@ -315,7 +351,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 }
             }
-        }, 500);
+        }, 1000);
 
         inform_Button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -333,6 +369,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View view) {
                 drawer.closeDrawer(GravityCompat.START);
                 Intent intent = new Intent(MainActivity.this,SuggestActivity.class);
+                intent.putExtra("userID",userID);
+                startActivity(intent);
+                overridePendingTransition(R.anim.anim_slide_out_left,R.anim.anim_slide_in_right);
+            }
+        });
+
+        nav_opiton_Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawer.closeDrawer(GravityCompat.START);
+                Intent intent = new Intent(MainActivity.this,OptionActivity.class);
                 intent.putExtra("userID",userID);
                 startActivity(intent);
                 overridePendingTransition(R.anim.anim_slide_out_left,R.anim.anim_slide_in_right);

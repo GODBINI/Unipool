@@ -64,6 +64,9 @@ public class SuggestActivity extends AppCompatActivity {
                                                 .setPositiveButton("확인",null)
                                                 .create()
                                                 .show();
+                                    s_arrival_Text.setText("");
+                                    s_departure_Text.setText("");
+                                    s_university_Text.setText("");
                                 }
                             }
                             catch (JSONException e) {
@@ -106,10 +109,11 @@ public class SuggestActivity extends AppCompatActivity {
                                 if(success) {
                                     suggest_text.setText("");
                                     AlertDialog.Builder builder = new AlertDialog.Builder(SuggestActivity.this);
-                                    builder.setMessage("감사합니다.")
+                                    builder.setMessage("소중한 의견 감사합니다.")
                                             .setPositiveButton("확인",null)
                                             .create()
                                             .show();
+                                    suggest_text.setText("");
                                 }
                             }
                             catch (JSONException e) {

@@ -37,10 +37,15 @@ public class WriteActivity extends AppCompatActivity {
     Button write_date_button;
     TextView write_time_text;
     TextView write_date_text;
+    TextView WriteText;
     String msg="";
     String date_msg = "";
     String school = "";
     final Calendar cal = Calendar.getInstance();
+
+    RequestQueue WriteQueue;
+    RequestQueue RefreshQueue;
+    RequestQueue UpdateQueue;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,6 +56,7 @@ public class WriteActivity extends AppCompatActivity {
         final String trust = beforeIntent.getStringExtra("trust");
         final String Uni = beforeIntent.getStringExtra("Uni");
         final String[] U_list = beforeIntent.getStringArrayExtra("U_list");
+        final int isUpdate = beforeIntent.getIntExtra("isUpdate",0);
         final Button Write_Cancel_Button = (Button)findViewById(R.id.Write_Cancel_Button);
         final Button Write_Ok_Button = (Button)findViewById(R.id.Write_Ok_Button);
         final Spinner school_spinner = (Spinner)findViewById(R.id.school_spinner);
@@ -60,10 +66,15 @@ public class WriteActivity extends AppCompatActivity {
         write_time_text = (TextView) findViewById(R.id.write_time_text);
         write_date_button = (Button)findViewById(R.id.write_date_button);
         write_date_text = (TextView) findViewById(R.id.write_date_text);
+        WriteText = (TextView)findViewById(R.id.WriteText);
         SimpleDateFormat format = new SimpleDateFormat("MM월 dd일");
         Date time  = new Date();
         date_msg = format.format(time);
         write_date_text.setText("출발 날짜 : " + date_msg);
+
+        WriteQueue = Volley.newRequestQueue(WriteActivity.this);
+        RefreshQueue = Volley.newRequestQueue(WriteActivity.this);
+        UpdateQueue = Volley.newRequestQueue(WriteActivity.this);
 
         ArrayAdapter SchoolSpinnerAdapter = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item,U_list);
         school_spinner.setAdapter(SchoolSpinnerAdapter);
@@ -78,6 +89,28 @@ public class WriteActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
+        if(isUpdate == 1) {
+            WriteText.setText("모집글 수정");
+            Response.Listener<String> responseListener = new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    try {
+                        JSONObject jsonResponse = new JSONObject(response);
+                        boolean success = jsonResponse.getBoolean("success");
+                        if(success) {
+                            Title_Text.setText(jsonResponse.getString("title"));
+                            Comment_Text.setText(jsonResponse.getString("comment"));
+                        }
+                    }
+                    catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            UpdateRefreshRequest updateRefreshRequest = new UpdateRefreshRequest(userID,responseListener);
+            RefreshQueue.add(updateRefreshRequest);
+        }
+
 
         Write_Cancel_Button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,34 +153,55 @@ public class WriteActivity extends AppCompatActivity {
                             .show();
                 }
                 else {
-                    Response.Listener<String> responseListener = new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            try {
-                                JSONObject jsonResponse = new JSONObject(response);
-                                boolean success = jsonResponse.getBoolean("success");
-                                boolean overlap = jsonResponse.getBoolean("overlap");
-                                if(success){
-                                    Toast.makeText(WriteActivity.this,"작성 완료!",Toast.LENGTH_SHORT).show();
-                                    finish();
+                    if(isUpdate==0) {
+                        Response.Listener<String> responseListener = new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                try {
+                                    JSONObject jsonResponse = new JSONObject(response);
+                                    boolean success = jsonResponse.getBoolean("success");
+                                    boolean overlap = jsonResponse.getBoolean("overlap");
+                                    if (success) {
+                                        Toast.makeText(WriteActivity.this, "작성 완료!", Toast.LENGTH_SHORT).show();
+                                        finish();
+                                    } else {
+                                        if (overlap) {
+                                            Toast.makeText(WriteActivity.this, "이미 작성한 게시글이 존재하거나 모집글에 속한상태입니다.", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            Toast.makeText(WriteActivity.this, "같은제목을 가진 모집글이 이미 존재합니다!\n제목을 변경해주세요.", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
                                 }
-                                else {
-                                    if(overlap) {
-                                        Toast.makeText(WriteActivity.this,"이미 작성한 게시글이 존재하거나 모집글에 속한상태입니다.",Toast.LENGTH_SHORT).show();
+                            }
+                        };
+                        WriteRequest writeRequest = new WriteRequest(userID, school, title, date_msg + "\n" + msg + " 출발", comment, responseListener);
+                        WriteQueue.add(writeRequest);
+                    }
+                    else {
+                        Response.Listener<String> responseListener = new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                try {
+                                    JSONObject jsonResponse = new JSONObject(response);
+                                    boolean success = jsonResponse.getBoolean("success");
+                                    if(success) {
+                                        Toast.makeText(WriteActivity.this, "수정 완료", Toast.LENGTH_SHORT).show();
+                                        finish();
                                     }
                                     else {
-                                        Toast.makeText(WriteActivity.this,"같은제목을 가진 모집글이 이미 존재합니다!\n제목을 변경해주세요.",Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(WriteActivity.this, "오류 발생", Toast.LENGTH_SHORT).show();
                                     }
                                 }
+                                catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
                             }
-                            catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    };
-                    WriteRequest writeRequest = new WriteRequest(userID,school,title,date_msg+"\n"+msg+" 출발",comment,responseListener);
-                    RequestQueue requestQueue = Volley.newRequestQueue(WriteActivity.this);
-                    requestQueue.add(writeRequest);
+                        };
+                        UpdateRequest updateRequest = new UpdateRequest(userID, school, title, date_msg + "\n" + msg + " 출발", comment, responseListener);
+                        UpdateQueue.add(updateRequest);
+                    }
                 }
             }
         });

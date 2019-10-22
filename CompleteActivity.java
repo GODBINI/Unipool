@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -81,6 +83,7 @@ public class CompleteActivity extends AppCompatActivity {
         final RecyclerAdapter recyclerAdapter = new RecyclerAdapter();
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        final Handler handler = new Handler();
         //getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         chat_RecyclerView.setLayoutManager(linearLayoutManager);
@@ -160,7 +163,12 @@ public class CompleteActivity extends AppCompatActivity {
                     RequestQueue requestQueue = Volley.newRequestQueue(CompleteActivity.this);
                     requestQueue.add(chatInputRequest);
                 }
-                chat_RecyclerView.scrollToPosition(recyclerAdapter.getItemCount()-1);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        chat_RecyclerView.scrollToPosition(recyclerAdapter.getItemCount()-1);
+                    }
+                }, 300);
             }
         });
 
@@ -216,7 +224,7 @@ public class CompleteActivity extends AppCompatActivity {
             }
         };
         timer = new Timer();
-        timer.schedule(timerTask,0,500);
+        timer.schedule(timerTask,0,200);
 
 
         completeQueue = Volley.newRequestQueue(CompleteActivity.this);

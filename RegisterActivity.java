@@ -117,7 +117,7 @@ public class RegisterActivity extends AppCompatActivity {
                                         if (success) {
                                             DBHelper dbHelper = new DBHelper(RegisterActivity.this);
                                             SQLiteDatabase db = dbHelper.getWritableDatabase();
-                                            db.execSQL("insert into login_info(userID,userPW,uni) values(?,?,?)",new String[]{userID,userPW,Uni});
+                                            db.execSQL("insert into login_info(userID,userPW,uni,map) values(?,?,?,1)",new String[]{userID,userPW,Uni});
                                             db.close();
                                             AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
                                             builder.setMessage("회원가입 성공")
