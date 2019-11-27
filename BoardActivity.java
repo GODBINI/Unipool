@@ -72,6 +72,12 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
 
     Button nav_headerOptionButton;
     Button nav_headerUpdateButton;
+    Button nav_headerGuideButton;
+
+    LinearLayout WriteLayout;
+    LinearLayout RemoveLayout;
+    LinearLayout BoardBoardLayout;
+    LinearLayout BoardHomeLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,9 +93,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
         final String[] U_list = beforeIntent.getStringArrayExtra("U_list");
         final Button board_homeButton = (Button)findViewById(R.id.board_homeButton);
         final Button board_boardButton = (Button)findViewById(R.id.board_boardButton);
-        final Button Write_Button = (Button)findViewById(R.id.Write_Button);
         final Button refresh_Button = (Button)findViewById(R.id.refresh_Button);
-        final Button Remove_Button = (Button)findViewById(R.id.Remove_Button);
         final Button user_setting_Button2 = (Button)findViewById(R.id.user_setting_Button2);
         final TextView Board_HomeText = (TextView)findViewById(R.id.board_homeText);
 
@@ -120,7 +124,11 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
         final ImageView nav_headerInfoImage = (ImageView)nav_headerView.findViewById(R.id.nav_headerInfoImage);
         nav_headerOptionButton = (Button)nav_headerView.findViewById(R.id.nav_headerOptionButton);
         nav_headerUpdateButton = (Button)nav_headerView.findViewById(R.id.nav_headerUpdateButton);
-
+        nav_headerGuideButton = (Button)nav_headerView.findViewById(R.id.nav_headerGuideButton);
+        WriteLayout = (LinearLayout)findViewById(R.id.WriteLayout);
+        RemoveLayout = (LinearLayout)findViewById(R.id.RemoveLayout);
+        BoardBoardLayout = (LinearLayout)findViewById(R.id.BoardBoardLayout);
+        BoardHomeLayout = (LinearLayout)findViewById(R.id.BoardHomeLayout);
         final SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.swipe);
 
         getBoardQueue = Volley.newRequestQueue(BoardActivity.this);
@@ -222,8 +230,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
             }
         };
 
-        board_homeButton.setOnClickListener(onClickListener);
-        Board_HomeText.setOnClickListener(onClickListener);
+        BoardHomeLayout.setOnClickListener(onClickListener);
 
         board_boardButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -232,7 +239,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
             }
         });
 
-        Write_Button.setOnClickListener(new View.OnClickListener() {
+        WriteLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent Write_Intent = new Intent(BoardActivity.this,WriteActivity.class);
@@ -333,7 +340,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
         timer = new Timer();
         timer.schedule(timerTask,0,500);
 
-        Remove_Button.setOnClickListener(new View.OnClickListener() {
+        RemoveLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(BoardActivity.this);
@@ -621,6 +628,15 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
             }
         });
 
+        nav_headerGuideButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawer.closeDrawer(GravityCompat.START);
+                Intent intent = new Intent(BoardActivity.this,GuideActivity.class);
+                startActivity(intent);
+            }
+        });
+
         nav_headerInfoImage.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -633,8 +649,8 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
                         Toast toast = Toast.makeText(BoardActivity.this,"",Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP | Gravity.LEFT,x,y);
                         TextView tvToastMsg = new TextView(BoardActivity.this);
-                        tvToastMsg.setText(" 다른유저가 사용자를 판단할수있는 신뢰도 점수입니다.\n\n"+
-                                "*신뢰도 평가시*\n좋음 : +2점\n나쁨 : -3점");
+                        tvToastMsg.setText(" 다른 유저가 사용자를 판단할 수 있는 신뢰도 점수입니다.\n\n"+
+                                "*신뢰도 평가 시*\n좋음 : +2점\n나쁨 : -3점");
                         tvToastMsg.setTextColor(Color.BLACK);
                         tvToastMsg.setTextSize(16);
                         tvToastMsg.setBackgroundColor(Color.WHITE);
@@ -654,7 +670,7 @@ public class BoardActivity extends AppCompatActivity implements NavigationView.O
     public void onBackPressed() {
         if(System.currentTimeMillis()-time>=1000){
             time=System.currentTimeMillis();
-            Toast.makeText(getApplicationContext(),"뒤로 버튼을 한번 더 누르면 종료합니다.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"뒤로 가기 버튼을 한 번 더 누르면 종료됩니다.", Toast.LENGTH_SHORT).show();
         }else if(System.currentTimeMillis()-time<1000){
             finishAffinity();
             System.runFinalization();

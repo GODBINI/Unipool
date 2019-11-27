@@ -58,8 +58,8 @@ public class SplashActivity extends AppCompatActivity {
                         if(success) {
                             Intent LoginIntent = new Intent(SplashActivity.this, MainActivity.class);
                             LoginIntent.putExtra("userID",userID);
-                            LoginIntent.putExtra("Uni",Uni);
                             LoginIntent.putExtra("U_list",stringList.U_list);
+                            LoginIntent.putExtra("Uni",Uni);
                             startActivity(LoginIntent);
                             finish();
                         }
@@ -86,7 +86,6 @@ public class SplashActivity extends AppCompatActivity {
         }
         else {
             Intent SplashIntent = new Intent(this, LoginActivity.class);
-            SplashIntent.putExtra("U_list",stringList.U_list);
             startActivity(SplashIntent);
             finish();
         }

@@ -47,7 +47,7 @@ public class RegisterActivity extends AppCompatActivity {
         Register_idText = (EditText)findViewById(R.id.Register_idText);
         Register_pwText = (EditText)findViewById(R.id.Register_pwText);
         Register_spinner = (Spinner)findViewById(R.id.Register_spinner);
-        Register_accountText = (EditText)findViewById(R.id.Register_accountText);
+        //Register_accountText = (EditText)findViewById(R.id.Register_accountText);
 
         linearLayout = (LinearLayout)findViewById(R.id.register_layout);
         inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -80,7 +80,7 @@ public class RegisterActivity extends AppCompatActivity {
             public void onClick(View view) {
                 final String userID = Register_idText.getText().toString();
                 final String userPW = Register_pwText.getText().toString();
-                final String Account = Register_accountText.getText().toString();
+                //final String Account = Register_accountText.getText().toString();
                 if (userID.trim().equals(""))
                     Toast.makeText(RegisterActivity.this, "아이디를 입력해주세요.", Toast.LENGTH_SHORT).show();
                 else if (userPW.trim().equals(""))
@@ -145,7 +145,7 @@ public class RegisterActivity extends AppCompatActivity {
                             }
                         }
                     };
-                    RegisterRequest registerRequest = new RegisterRequest(email,userID, userPW, Uni, Account, responseListener);
+                    RegisterRequest registerRequest = new RegisterRequest(email,userID, userPW, Uni,"", responseListener);
                     RequestQueue queue = Volley.newRequestQueue(RegisterActivity.this);
                     queue.add(registerRequest);
                 }

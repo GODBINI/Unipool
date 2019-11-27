@@ -1,5 +1,6 @@
 package com.unipool.unipool;
 
+import android.content.Context;
 import android.content.Intent;
 
 import androidx.appcompat.app.AlertDialog;
@@ -26,11 +27,12 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        Context context = getApplicationContext();
         final EditText id_inputText = (EditText)findViewById(R.id.id_inputText);
         final EditText pw_inputText = (EditText)findViewById(R.id.pw_inputText);
         final Button RegisterButton = (Button)findViewById(R.id.RegisterButton);
         final Button LoginButton = (Button)findViewById(R.id.LoginButton);
-        final String[] U_list = getIntent().getStringArrayExtra("U_list");
+        final StringList stringList = new StringList(context);
 
         final DBHelper dbHelper = new DBHelper(LoginActivity.this);
         RegisterButton.setOnClickListener(new View.OnClickListener() {
@@ -60,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
                                 Intent LoginIntent = new Intent(LoginActivity.this, MainActivity.class);
                                 LoginIntent.putExtra("userID",userID);
                                 LoginIntent.putExtra("Uni",Uni);
-                                LoginIntent.putExtra("U_list",U_list);
+                                LoginIntent.putExtra("U_list",stringList.U_list);
                                 startActivity(LoginIntent);
                                 finish();
                             }

@@ -3,6 +3,7 @@ package com.unipool.unipool;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
@@ -21,7 +22,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -68,12 +68,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     Spinner Departure_Spinner;
     Spinner Arrival_Spinner;
     Button Match_Button;
-    Button nav_opiton_Button;
+    Button nav_option_Button;
+    Button nav_guide_Button;
     int map;
     MapFragment NmapFragment;
 
     RequestQueue quickchatQueue;
     RequestQueue getTrustQueue;
+
+    LinearLayout HomeBoardLayout;
+
+    public SharedPreferences prefs;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,9 +129,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         final ImageView navInfoImage = (ImageView)nav_headerView.findViewById(R.id.navInfoImage);
         final LinearLayout MainLayout = (LinearLayout)findViewById(R.id.MainLayout);
         final LinearLayout mapLayout = (LinearLayout)findViewById(R.id.mapLayout);
-        nav_opiton_Button = (Button)nav_headerView.findViewById(R.id.nav_option_Button);
+        nav_option_Button = (Button)nav_headerView.findViewById(R.id.nav_option_Button);
+        nav_guide_Button = (Button)nav_headerView.findViewById(R.id.nav_guide_Button);
+        HomeBoardLayout = (LinearLayout)findViewById(R.id.HomeBoardLayout);
 
-        //GuideIntent();
+        checkFirstRun();
+
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -229,8 +238,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         };
 
-        home_boardButton.setOnClickListener(onClickListener);
-        home_boardText.setOnClickListener(onClickListener);
+        HomeBoardLayout.setOnClickListener(onClickListener);
 
         home_homeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -243,6 +251,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View view) {
                 if(!select) {
+                    Toast.makeText(MainActivity.this,"출발지와 도착지를 선택해주세요.",Toast.LENGTH_SHORT).show();
+                }
+                else if(arrival.trim().equals("") || departure.trim().equals("")) {
                     Toast.makeText(MainActivity.this,"출발지와 도착지를 선택해주세요.",Toast.LENGTH_SHORT).show();
                 }
                 else {
@@ -375,7 +386,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        nav_opiton_Button.setOnClickListener(new View.OnClickListener() {
+        nav_option_Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 drawer.closeDrawer(GravityCompat.START);
@@ -383,6 +394,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 intent.putExtra("userID",userID);
                 startActivity(intent);
                 overridePendingTransition(R.anim.anim_slide_out_left,R.anim.anim_slide_in_right);
+            }
+        });
+
+        nav_guide_Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawer.closeDrawer(GravityCompat.START);
+                Intent intent = new Intent(MainActivity.this,GuideActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -447,8 +467,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         Toast toast = Toast.makeText(MainActivity.this,"",Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP | Gravity.LEFT,x,y);
                         TextView tvToastMsg = new TextView(MainActivity.this);
-                        tvToastMsg.setText(" 다른유저가 사용자를 판단할수있는 신뢰도 점수입니다.\n\n"+
-                                "*신뢰도 평가시*\n좋음 : +2점\n나쁨 : -3점");
+                        tvToastMsg.setText(" 다른 유저가 사용자를 판단할 수 있는 신뢰도 점수입니다.\n\n"+
+                                "*신뢰도 평가 시*\n좋음 : +2점\n나쁨 : -3점");
                         tvToastMsg.setTextColor(Color.BLACK);
                         tvToastMsg.setTextSize(16);
                         tvToastMsg.setBackgroundColor(Color.WHITE);
@@ -503,7 +523,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onBackPressed() {
         if(System.currentTimeMillis()-time>=1000){
             time=System.currentTimeMillis();
-            Toast.makeText(getApplicationContext(),"뒤로 버튼을 한번 더 누르면 종료합니다.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"뒤로 가기 버튼을 한 번 더 누르면 종료됩니다.", Toast.LENGTH_SHORT).show();
         }else if(System.currentTimeMillis()-time<1000){
             finishAffinity();
             System.runFinalization();
@@ -616,35 +636,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         dialog.dismiss();
     }
 
-    public void GuideIntent () {
-        Intent GuideIntent = new Intent(MainActivity.this,GuideActivity.class);
-        final int [] U = new int[2];
-        final int [] D = new int[2];
-        final int [] A = new int[2];
-        final int [] M = new int[2];
-        Uni_Spinner.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                Uni_Spinner.getViewTreeObserver().removeOnPreDrawListener(this);
-                //여기서 뷰의 크기를 가져온다.
-                Uni_Spinner.getLocationOnScreen(U);
-                return true;
-            }
-        });
-        Uni_Spinner.getLocationOnScreen(U);
-        Departure_Spinner.getLocationOnScreen(D);
-        Arrival_Spinner.getLocationOnScreen(A);
-        Match_Button.getLocationOnScreen(M);
-        GuideIntent.putExtra("UX",U[0]);
-        GuideIntent.putExtra("UY",U[1]);
-        GuideIntent.putExtra("DX",Departure_Spinner.getX());
-        GuideIntent.putExtra("DY",Departure_Spinner.getY());
-        GuideIntent.putExtra("AX",Arrival_Spinner.getX());
-        GuideIntent.putExtra("AY",Arrival_Spinner.getY());
-        GuideIntent.putExtra("MX",Match_Button.getX() + Match_Button.getWidth()/2);
-        GuideIntent.putExtra("MY",Match_Button.getY() + Match_Button.getHeight()/2);
-        startActivity(GuideIntent);
+    public void checkFirstRun() {
+        prefs = getSharedPreferences("Pref", MODE_PRIVATE);
+        boolean isFirstRun = prefs.getBoolean("isFirstRun", true);
+        if (isFirstRun) {
+            Intent GuideIntent = new Intent(MainActivity.this,GuideActivity.class);
+            startActivity(GuideIntent);
+
+            prefs.edit().putBoolean("isFirstRun", false).apply();
+        }
     }
-
-
 }
